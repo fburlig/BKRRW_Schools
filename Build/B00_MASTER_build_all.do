@@ -24,15 +24,7 @@ do "$dirpath_code_build/B02_MASTER_weather_build_oct18.do"
  * current name: "$dirpath_code_build/MASTER_weather_build_oct18.do"
  
 *** Build energy efficiency upgrade data
-** CHECK ON SUBFILES AND/OR JUST COMBINE THIS INTO ONE THING
-* create upgrades - calls ee_build_new, ee_build_cleanup, ee_build_cumul
-do "$dirpath_code_build/B03A_MASTER_ee_data_build_partA.do"
-do "$dirpath_code_build/B03B_MASTER_ee_data_build_partB.do"
-do "$dirpath_code_build/B03C_MASTER_ee_data_build_partC.do"
-
- *current name: "$dirpath_code_build/oct17_eedata_build.do" 
- *current name: "$dirpath_code_build/nov5_eedata_build.do" 
- *current name: "$dirpath_code_build/oct17_eedata_build_OLDDATA.do" 
+do "$dirpath_code_build/B03_MASTER_ee_data_build.do"
 
 *** Merge school energy data with school EE data (step 1)
 do "$dirpath_code_build/B04_MASTER_ee_energy_merge.do"
