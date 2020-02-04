@@ -24,17 +24,13 @@ do "$dirpath_code_build/B05_MASTER_merge_elec_temp.do"
 ** CHECK ON ME, HAVING THIS TWICE SEEMS DUMB?
 do "$dirpath_code_build/B06_MASTER_cumul_ee_build.do"
  * current name: "$dirpath_code_build/oct17_cumul_ee_build.do"
- 
-*** Label schools as HVAC/Lighting/both/neither (not sure we use this????)
-do "$dirpath_code_build/B07_MASTER_build_pure_hvac_light.do" // consider renaming further?
- * current name: "$dirpath_code_build/build_pure_hvac_light.do"
- 
+
 *** Export data to R for machine learning
-do "$dirpath_code_build/B08_MASTER_export_data_to_R.do"
+do "$dirpath_code_build/B07_MASTER_export_data_to_R.do"
  * current name: "$dirpath_code_build/aug9_TOR_schools.do"
  
-*** Construct a preliminary analysis dataset (not sure we use this????)
-do "$dirpath_code_build/B09_MASTER_temporary_build_for_jul6.do" // needs a further rename if we use it
+*** Prepare treatment variables and some covariates
+do "$dirpath_code_build/B08_MASTER_prep_treatment_vars.do" 
  * current name: "$dirpath_code_build/TEMPORARY_build_for_jul6.do"
  
 ***************************************************
@@ -47,19 +43,15 @@ stop
 ***************************************************
 
 *** Read prediction data into Stata
-do "$dirpath_code_build/B10_MASTER_predictions_build.do"
+do "$dirpath_code_build/B9_MASTER_predictions_build.do"
  * current name: "$dirpath_code_build/MASTER_predictions_build.do"
-
-*** Merge constructed prediction data with cds_codes, generate some control vars
-do "$dirpath_code_build/B11_MASTER_predictions_additions.do" // do we even use this now?
- * current name: "$dirpath_code_build/jun14_New_prediction_build.do"
  
 *** Collapse predictions to the month-hour level; add covariates/samples; split by prediction type
-do "$dirpath_code_build/B12_MASTER_predictions_monthly.do"
+do "$dirpath_code_build/B10_MASTER_predictions_monthly.do"
  * current name: "$dirpath_code_build/jun14_New_predition_build_monthly.do"
 
 *** Generate a coastal-vs-inland indicator
-do "$dirpath_code_build/B13_MASTER_is_coastal.do"
+do "$dirpath_code_build/B11_MASTER_is_coastal.do"
  * current name: "$dirpath_code_build/MASTER_is_coastal.do"
 
 
