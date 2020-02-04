@@ -1,41 +1,6 @@
 ************************************************
-**** BUILDER DO FILE TO PULL SCHOOLS INTO R
-**** WRITTEN BY FIONA BURLIG (fiona.burlig@berkeley.edu)
-**** CREATED: November 9, 2015
-**** LAST EDITED: November 9, 2015
-
-**** DESCRIPTION: This do-file creates a random sample of schools, and creates separate files for each school.
-			
-**** NOTES: 
-	*Current inputs: 
-	    * -- Final merged school electricity data
-	* File structure: 
-	    * -- new file: school-specific data
-	
-**** PROGRAMS:
-	   * -- 
-		
+**** PREPARE DATA FOR EXPORT TO R
 ************************************************
-************************************************
-**** SETUP
-clear all
-set more off, perm
-version 12
-
-global dirpath "S:/Fiona/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_data_weather "$dirpath/Data/Other data/Updated MesoWest Weather/From online/Final"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
-global dirpath_data_schoolspec "$dirpath/Data/Intermediate/School specific"
-************************************************
-set seed 12345
-local percent_to_keep = 1
 
 use "$dirpath_data_int/MASTER_school_temp_merge.dta", clear
 
@@ -137,25 +102,6 @@ foreach var of varlist cqkw_hour`school_min'-cqkw_hour`school_max' {
 	rename `var'_i `var'
 }
 
-/* check on how much of an improvement this is
-preserve 
-collapse (count) cqkw*
-gen obs  = 1
-reshape  long cqkw_hour, string j(series) i(obs)
-
-replace series = subinstr(series, "_", " ",.)
-split series
-
-drop obs series
-
-reshape wide cqkw, i(series1) j(series2) string
-replace series2 = "b" if series2==""
-
-reshape wide cqkw, i(series1) j(series2) string
-summ if cqkw_houri != .
-restore
-*/
-
 keep date block cqkw*
 
 export delimited using "$dirpath_data/Other data/ControlSchoolsLASSO/control_schools.csv", replace
@@ -163,11 +109,3 @@ export delimited using "$dirpath_data/Other data/ControlSchoolsLASSO/control_sch
 * clean up
 clear
 memory clear
-
-/*
-** keep a random x percent sample
-gen random_sample = 100*runiform()
-bysort cds_code: replace random_sample = random_sample[1]
-keep if random_sample <= `percent_to_keep'
-
-save "$dirpath_data_int/random_school_sample_`percent_to_keep'.dta", replace

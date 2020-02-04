@@ -1,53 +1,8 @@
 ************************************************
-**** MASTER DO FILE TO BUILD SCHOOL-LEVEL WEATHER DATA
-**** WRITTEN BY FIONA BURLIG (fiona.burlig@berkeley.edu)
-**** CREATED: September 2, 2015
-**** LAST EDITED: September 2, 2015
-
-**** DESCRIPTION: This do-file goes from cleaned MesoWest weather data to school-matched weather data.
-			
-**** NOTES: 
-	*Current inputs: 
-		* -- MesoWest cleaned weather data (constructed with the last dataset -- FB) 
-		* -- PG&E school-to-meter match from June 29, 2015
-		
-	* File structure: grab the (cleaned) MW weather from the old folder
-	
-**** PROGRAMS:
-	   * -- geoonear (ssc install geonear)
-		
+**** BUILD WEATHER DATA
 ************************************************
-************************************************
-**** SETUP
-clear all
-set more off, perm
-version 12
 
-global dirpath "S:/Fiona/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_data_weather "$dirpath/Data/Other data/Updated MesoWest Weather/From online/Final"
-
-************************************************
-************************************************
-**** CLEAR THE TEMP FOLDER
-
-/*
-capture {
-  cd "$dirpath_data_temp"
-  local tempfiles : dir . files "*.dta"
-  foreach file in `tempfiles' {
-     erase "`file'"
-  }
-}
-*/
-
-************************************************
+* -- geoonear (ssc install geonear)
 
 **** STEP 1: GRAB SCHOOL LAT-LONGS FROM PGE
 import excel "$dirpath_data_raw/PGE_Oct_2016/PGE School Meter Matching to UCB 20161017.xlsx", sheet("All_Match") firstrow clear

@@ -1,36 +1,7 @@
 ************************************************
-**** BUILD PREDICTION DATA
-**** WRITTEN BY FIONA BURLIG (fiona.burlig@berkeley.edu)
-**** CREATED: March 23, 2016
-**** LAST EDITED: March 23, 2016
-
-**** DESCRIPTION: This do-file prepares data from machine learning predictions.
-			
-**** NOTES: 
-	
-**** PROGRAMS:
-
-**** CHOICES:
-		
+**** READ PREDICTIONS DATA FROM R; BUILD IN STATA
 ************************************************
-************************************************
-**** SETUP:
-clear all
-set more off, perm
-set type double
-version 12
 
-global dirpath "T:/Projects/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_data_other "$dirpath/Data/Other data"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
-************************************************
 use "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", clear
 summ school_id
 local schoolidmax = r(max)

@@ -1,18 +1,5 @@
 ************************************************
-**** MASTER DATA BUILD FILE: BKRRW (2020)
-************************************************
-
-************************************************
-**** SETUP:
-clear all
-set more off, perm
-set type double
-version 12
-
-global dirpath "T:/Projects/Schools"
-global dirpath_code "$dirpath/Github"
-global dirpath_code_build "$dirpath_code/Build"
-global dirpath_code_analyze "$dirpath_code/Analyze"
+**** MASTER DATA BUILD FILE (CALLS ALL BUILD FILES)
 ************************************************
 
 *** Build electricity data (takes ~96 hours)

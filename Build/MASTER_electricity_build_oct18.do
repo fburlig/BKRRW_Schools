@@ -1,58 +1,13 @@
 ************************************************
-**** MASTER DO FILE TO BUILD SCHOOL-LEVEL ELECTRICITY DATA
-**** WRITTEN BY FIONA BURLIG (fiona.burlig@berkeley.edu)
-**** CREATED: August 5, 2015
-**** LAST EDITED: August 20, 2015
+**** BUILD ELECTRICITY DATA (WARNING: VERY SLOW)
+************************************************
 
-**** DESCRIPTION: This do-file goes from raw data to a cleaned electricity-only dataset.
-			
-**** NOTES: 
-	*Current inputs: 
-		* -- PG&E raw energy data (2008 - 2014) from March 24, 2015 
-		* -- PG&E raw energy data (2008 - 2014) from July 28, 2015
-		* -- PG&E school-to-meter match from June 29, 2015
-		* -- PG&E list of nonres-gas meters
-		
-	* Data: Everything is going to be aggregated to the HOURLY level for memory/storage constraints
-	* File structure: started by putting all of the PG&E electricity data in one folder
-	* COME BACK AND FIX: DATES WITH MISSING OBSERVATIONS??
 	
 **** PROGRAMS:
 	   * -- unique (ssc install unique)
 	   * -- gsort (ssc install gsort)
+	
 		
-************************************************
-************************************************
-**** SETUP
-clear all
-set more off, perm
-version 12
-
-global dirpath "S:/Fiona/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-
-************************************************
-************************************************
-**** CLEAR THE TEMP FOLDER
-
-/*
-capture {
-  cd "$dirpath_data_temp"
-  local tempfiles : dir . files "*.dta"
-  foreach file in `tempfiles' {
-     erase "`file'"
-  }
-}
-*/
-
-************************************************
-
 /*
 **** STEP 1: IMPORT ALL DATA FROM CSVs & SAVE TO STATA
 
