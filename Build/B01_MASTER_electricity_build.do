@@ -1,14 +1,7 @@
 ************************************************
 **** BUILD ELECTRICITY DATA (WARNING: VERY SLOW)
-************************************************
+************************************************		
 
-	
-**** PROGRAMS:
-	   * -- unique (ssc install unique)
-	   * -- gsort (ssc install gsort)
-	
-		
-/*
 **** STEP 1: IMPORT ALL DATA FROM CSVs & SAVE TO STATA
 
 *** 1A: Import 60' interval data 
@@ -377,19 +370,19 @@ forvalues i = 1/`metermax' {
 compress
 save "$dirpath_data_temp/pge_newelec_dates_full.dta", replace
 
-*/
+
 
 **** STEP 1D.I: Get PGE's school to meter match ready for use --- WITH CLUSTERS AS WELL
 
 ** prior step - grab the gas data out of here so we're not worried about elec-gas clusters
-/* these meters are electric meters
+ these meters are electric meters
 import delimited "$dirpath_data_raw/Non-Res SPs LatLong.txt", clear
 keep sp_id
 rename sp_id spid
 duplicates drop
 compress
 save "$dirpath_data_temp/nonres_sps.dta", replace
-*/
+
 
 import delimited "$dirpath_data_raw/Non-Res Gas SPs LatLong.txt", clear
 gen gas = 1
@@ -490,17 +483,6 @@ replace zeroflag = 1 if zeroflag >0 & zeroflag !=.
 replace meter_has_solar = 1 if meter_has_solar >0 & meter_has_solar !=.
 rename missingdata problematic_obs
 	
-/*
-* create some school year identifiers --not sure why we would want them here
-gen schoolyear = ""
-replace schoolyear = "0809" if date >= mdy(09, 01, 2008) & date <= mdy(06, 30, 2009)
-replace schoolyear = "0910" if date >= mdy(09, 01, 2009) & date <= mdy(06, 30, 2010)
-replace schoolyear = "1011" if date >= mdy(09, 01, 2010) & date <= mdy(06, 30, 2011)
-replace schoolyear = "1112" if date >= mdy(09, 01, 2011) & date <= mdy(06, 30, 2012)
-replace schoolyear = "1213" if date >= mdy(09, 01, 2012) & date <= mdy(06, 30, 2013)
-replace schoolyear = "1314" if date >= mdy(09, 01, 2013) & date <= mdy(06, 30, 2014)
-replace schoolyear = "1415" if date >= mdy(09, 01, 2014) & date <= mdy(06, 30, 2015)
-*/
 
 compress
 save "$dirpath_data_int/pge_electricity_MASTER_oct2016.dta", replace
