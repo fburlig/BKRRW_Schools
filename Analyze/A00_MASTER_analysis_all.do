@@ -15,7 +15,7 @@ do "$dirpath_code_analysis/Jul15_Selection"
  -- "$dirpath_data_other/Demographics/data_presidential_county.dta" [WHERE DOES THIS COME FROM?]
  -- "$dirpath_data_temp/school_treatdates.dta" [WHERE DOES THIS COME FROM?]
  -- "$dirpath_data_int/ee_total_formerge.dta"
- -- "$dirpath_data_int/hvac_light_pure.dta" [NEED TO BRING BACK THIS DO FILE]
+ -- "$dirpath_data_int/hvac_light_pure.dta" 
 
 * outputs:
  -- "$dirpath_data_int/data_for_selection_table.dta"
