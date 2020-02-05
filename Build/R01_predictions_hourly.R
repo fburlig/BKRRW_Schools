@@ -195,15 +195,7 @@ estimateModel <- function(i) {
   prediction.modelc = cv.glmnet(Xcontrols,Y,foldid=base$foldid,family="gaussian",alpha=1)
   dataset$prediction3 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.min"))
   dataset$prediction4 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.1se"))
-  
-  # prediction.model_log = cv.glmnet(X,Ylog,foldid=base$foldid,family="gaussian",alpha=1)
-  # dataset$prediction_log1 <- c(predict(prediction.model_log,Xall,type="link", s = "lambda.min"))
-  # dataset$prediction_log2 <- c(predict(prediction.model_log,Xall,type="link", s = "lambda.1se"))
-  # 
-  # prediction.model_logc = cv.glmnet(Xcontrols,Ylog,foldid=base$foldid,family="gaussian",alpha=1)
-  # dataset$prediction_log3 <- c(predict(prediction.model_logc,Xallcontrols,type="link", s = "lambda.min"))
-  # dataset$prediction_log4 <- c(predict(prediction.model_logc,Xallcontrols,type="link", s = "lambda.1se"))
-  
+
   # randomForest
   myvars <- c("qkw_hour", "temp_f", "holiday", "weekday", "month")
   dataset_forest <- dataset[myvars]
@@ -214,15 +206,12 @@ estimateModel <- function(i) {
   
   model_forest <- randomForest(qkw_hour ~ .,data=base_forest,na.action=na.omit)
   dataset$prediction7 <- predict(model_forest, dataset_forest)
-  
-  # model_forest_log <- randomForest(log(qkw_hour) ~ .,data=base_forest,na.action=na.omit)
-  # dataset$prediction_log7 <- predict(model_forest_log, dataset_forest)
-  
+
   #clean up and reduce size
   myvars<-c("school_id","date","qkw_hour","trainindex","prediction1","prediction2","prediction3","prediction4","prediction7")
   dataset <- dataset[,myvars]
   
-  write.csv(dataset,file=paste0("Intermediate/School specific/prediction/school_data_",i,"_prediction_block_fix",b,".csv"),row.names=FALSE)
+  write.csv(dataset,file=paste0("Intermediate/School specific/prediction/school_data_",i,"_prediction_block",b,".csv"),row.names=FALSE)
   
   #store picked variables
   varnames1 <- as.data.frame(cbind(coef(prediction.model, s = "lambda.min")@Dimnames[[1]][coef(prediction.model, s = "lambda.min")@i+1],
@@ -239,54 +228,38 @@ estimateModel <- function(i) {
   
   varnames4 <- as.data.frame(cbind(coef(prediction.modelc, s = "lambda.1se")@Dimnames[[1]][coef(prediction.modelc, s = "lambda.1se")@i+1],
                                    coef(prediction.modelc, s = "lambda.1se")@x))
-  varnames4$model <- "levels_controls_se"     
-
-  # varnames_log1 <- as.data.frame(cbind(coef(prediction.model_log, s = "lambda.min")@Dimnames[[1]][coef(prediction.model_log, s = "lambda.min")@i+1],
-  #                                      coef(prediction.model_log, s = "lambda.min")@x))
-  # varnames_log1$model <- "log_min" 
-  # 
-  # varnames_log2 <- as.data.frame(cbind(coef(prediction.model_log, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model_log, s = "lambda.1se")@i+1],
-  #                                      coef(prediction.model_log, s = "lambda.1se")@x))
-  # varnames_log2$model <- "log_se"     
-  # 
-  # varnames_log3 <- as.data.frame(cbind(coef(prediction.model_logc, s = "lambda.min")@Dimnames[[1]][coef(prediction.model_logc, s = "lambda.min")@i+1],
-  #                                      coef(prediction.model_logc, s = "lambda.min")@x))
-  # varnames_log3$model <- "log_controls_min" 
-  # 
-  # varnames_log4 <- as.data.frame(cbind(coef(prediction.model_logc, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model_logc, s = "lambda.1se")@i+1],
-  #                                      coef(prediction.model_logc, s = "lambda.1se")@x))
-  # varnames_log4$model <- "log_controls_se"     
+  varnames4$model <- "levels_controls_se"
 
   varnames <- rbind(varnames1, varnames2, varnames3, varnames4)
   colnames(varnames)[colnames(varnames) == "V1"] <- "varname"
   colnames(varnames)[colnames(varnames) == "V2"] <- "coef"
   
-  write.csv(varnames,file=paste0("Intermediate/School specific/prediction/school_",i,"_prediction_variables_fix",b,".csv"),row.names=FALSE)
+  write.csv(varnames,file=paste0("Intermediate/School specific/prediction/school_",i,"_prediction_variables",b,".csv"),row.names=FALSE)
 
   # bootstrap
-  # datasetbs <- NULL
-  # week_bs <- NULL
-  # for (bs in 2:21) {
-  #   week_bs$weekid <- week_id[[bs]]
-  #   week_bs$foldid <- fold_id[[bs]]
-  #   week_bs <- as.data.frame(week_bs)
-  #   toselect = merge(base %>% select(weekid,rowindex),week_bs %>% select(weekid,foldid),by="weekid")
-  #   
-  #   Xcontrols = Xallcontrols[toselect$rowindex, ,drop = FALSE]
-  #   Y = base$qkw_hour[toselect$rowindex]
-  #   
-  #   model.bs <- NULL
-  #   predictionbs <- NULL
-  #   try(model.bs <- cv.glmnet(Xcontrols,Y,foldid=toselect$foldid,family="gaussian",alpha=1))
-  #   try(predictionbs <- c(predict(model.bs,Xallcontrols,type="link", s = "lambda.1se")))
-  #   datasetbs <- cbind(datasetbs, predictionbs)
-  # }
-  # datasetbs = as.data.frame(datasetbs)
-  # for (bs in 1:20) {
-  #   names(datasetbs)[bs] <- paste0("predbs",bs)
-  # }
-  # datasetbs$date = dataset$date
-  # write.csv(datasetbs,file=paste0("Intermediate/School specific/prediction/school_data_",i,"_bootstrap",b,".csv"),row.names=FALSE)
+  datasetbs <- NULL
+  week_bs <- NULL
+  for (bs in 2:21) {
+    week_bs$weekid <- week_id[[bs]]
+    week_bs$foldid <- fold_id[[bs]]
+    week_bs <- as.data.frame(week_bs)
+    toselect = merge(base %>% select(weekid,rowindex),week_bs %>% select(weekid,foldid),by="weekid")
+
+    Xcontrols = Xallcontrols[toselect$rowindex, ,drop = FALSE]
+    Y = base$qkw_hour[toselect$rowindex]
+
+    model.bs <- NULL
+    predictionbs <- NULL
+    try(model.bs <- cv.glmnet(Xcontrols,Y,foldid=toselect$foldid,family="gaussian",alpha=1))
+    try(predictionbs <- c(predict(model.bs,Xallcontrols,type="link", s = "lambda.1se")))
+    datasetbs <- cbind(datasetbs, predictionbs)
+  }
+  datasetbs = as.data.frame(datasetbs)
+  for (bs in 1:20) {
+    names(datasetbs)[bs] <- paste0("predbs",bs)
+  }
+  datasetbs$date = dataset$date
+  write.csv(datasetbs,file=paste0("Intermediate/School specific/prediction/school_data_",i,"_bootstrap",b,".csv"),row.names=FALSE)
   
   }
   return(i)

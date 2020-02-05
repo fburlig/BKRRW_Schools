@@ -86,18 +86,14 @@ estimateModel <- function(i) {
   model_forest <- randomForest(qkw_hour ~ .,data=base_forest,na.action=na.omit)
   dataset$prediction8 <- predict(model_forest, dataset_forest)
   
-  model_forest_log <- randomForest(log(qkw_hour) ~ .,data=base_forest,na.action=na.omit)
-  dataset$prediction_log8 <- predict(model_forest_log, dataset_forest)
-  
-  
   # store results
   dataset$trainindex <- 0
   dataset$trainindex[trainindex] <- 1
   
-  myvars <- c("school_id", "date", "block", "trainindex", "prediction8", "prediction_log8")
+  myvars <- c("school_id", "date", "block", "trainindex", "prediction8")
   dataset <- dataset[myvars]
   
-  write.csv(dataset,file=paste0("Intermediate/School specific/forest/school_data_",i,"_prediction_fix.csv"))
+  write.csv(dataset,file=paste0("Intermediate/School specific/forest/school_data_",i,"_prediction.csv"))
   
   return(i)
   
