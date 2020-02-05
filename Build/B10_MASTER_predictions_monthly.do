@@ -64,34 +64,10 @@ summ mean_energy_use if obs == 1, det
 replace sample2 = 0 if mean_energy_use < `r(p1)' & mean_energy_use != .
 replace sample2 = 0 if mean_energy_use > `r(p99)' & mean_energy_use != .
 
-/*
-gen sample4 = 1
-summ proj_sav_pct if obs==1 & proj_sav_pct != 0, det
-replace sample4 = 0 if proj_sav_pct < `r(p1)' & proj_sav_pct != 0
-replace sample4 = 0 if proj_sav_pct > `r(p99)' & proj_sav_pct != 0
-
-gen sample5 = 1
-summ proj_sav_pct if obs==1 & proj_sav_pct != 0, det
-replace sample5 = 0 if proj_sav_pct < `r(p5)' & proj_sav_pct != 0
-replace sample5 = 0 if proj_sav_pct > `r(p95)' & proj_sav_pct != 0
-*/
-
 gen byte sample6 = 1
 summ tot_kwh if obs == 1 & tot_kwh !=0, det
 replace sample6 = 0 if tot_kwh < `r(p1)' & tot_kwh != 0
 replace sample6 = 0 if tot_kwh > `r(p99)' & tot_kwh != 0
-
-/*
-gen sample7 = 1
-replace sample7 = 0 if tot_kwh < `r(p5)' & tot_kwh != 0
-replace sample7 = 0 if tot_kwh > `r(p95)' & tot_kwh != 0
-
-cap drop sample10
-gen sample10 = 1
-summ mean_energy_use if obs == 1 & mean_energy_use !=0, det
-replace sample10 = 0 if mean_energy_use < `r(p5)' & mean_energy_use != .
-replace sample10 = 0 if mean_energy_use > `r(p95)' & mean_energy_use != .
-*/
 
 gen byte evertreated = 0
 replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
@@ -107,7 +83,6 @@ local bslist = ""
 forvalues bs = 1(1)20 {
 	local bslist = "`bslist' _bs`bs'"
 }
-* 0 1 2 3 4 7 8 9 `bslist' 
 foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 	di "`pred'"
 	** CREATE MONTHLY FILES AND APPEND
