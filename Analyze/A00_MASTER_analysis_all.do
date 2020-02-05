@@ -19,8 +19,9 @@ global dirpath_code_analysis "T:/Home/Mar/github/schools_git/Analyze"
 
 -- COULD STREAMLINE SOME OF THESE
 
+************************************************
 ** ANALYSIS FILES -- TABLES:
-
+{
 do "$dirpath_code_analysis/MASTER_selection_table_data.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
 do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
@@ -483,3 +484,36 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
 * FINAL TABLE SAVED IN: "$dirpath_results_final/tab_aggregate_predictions_binary_davis_reguant_doublelasso.tex"
 }
+}
+
+
+
+************************************************
+** ANALYSIS FILES -- FIGURES:
+
+** Figure 1: Locations of untreated and treated schools
+{
+// No do-file required to produce results; self-contained within: "$dirpath_code_produceoutput/jan4_map_tc.R"
+
+/*
+* inputs:
+ -- "$dirpath_data/Other data/Utility Map/cb_2015_us_state_5m.shp"
+ -- "$dirpath_data/Other data/Utility Map/CA_Electric_Investor_Owned_Utilities_IOUs.shp"
+ -- "$dirpath_data/Other data/Utility Map/utility_map_fromstata.dta" [WHERE DOES THIS COME FROM?]
+* outputs: N/A
+*/
+
+/*
+* FINAL FIGURES SAVED IN: 
+ -- "$dirpath_results_final/utilitymap_conly.pdf"
+ -- "$dirpath_results_final/utilitymap_conly.pdf"
+ */
+}
+
+** Figure 2: School characteristics before and after treatment
+{
+
+
+
+}
+
