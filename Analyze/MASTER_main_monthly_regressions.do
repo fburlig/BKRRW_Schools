@@ -52,32 +52,32 @@ foreach postctrls in "" "post" {
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
-       local fes = "cds_code#prediction block#prediction"
+       local fes = "cds_code block"
 	   replace spec = 1 in `row'
       }
       else if "`spec'" == "f" {
-       local fes = "cds_code#block#prediction"
+       local fes = "cds_code#block"
 	   replace spec = 2 in `row'
       }
       else if "`spec'" == "h" {
-       local fes = "cds_code#block#prediction month_of_sample#prediction"
+       local fes = "cds_code#block month_of_sample"
 	   replace spec = 5 in `row'   
       }
       else if "`spec'" == "i" {
-       local fes = "cds_code#block#month#prediction"
+       local fes = "cds_code#block#month"
 	   replace spec = 3 in `row'
       }
 	  else if "`spec'" == "j" {
-       local fes = "cds_code#block#month#prediction month_of_sample#prediction"
+       local fes = "cds_code#block#month month_of_sample"
 	   replace spec = 6 in `row'
       } 
       else if "`spec'" == "m" {
-	   local ctrls = "c.month_of_sample#prediction"
-	   local fes = "cds_code#block#month#prediction"
+	   local ctrls = "c.month_of_sample"
+	   local fes = "cds_code#block#month"
 	   replace spec = 4 in `row'
 	  }
 	  if "`postctrls'" == "post" {
-	   local ctrls = "`ctrls' c.posttrain#prediction"
+	   local ctrls = "`ctrls' c.posttrain"
 	  } 
 	 }
 
