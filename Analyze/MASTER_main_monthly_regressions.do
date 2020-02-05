@@ -1,5 +1,6 @@
 ************************************************
 **** RUNNING REGRESSIONS MAIN RESULTS
+**** (using monthly data)
 ************************************************
 
 ************************************************
@@ -8,7 +9,7 @@ clear all
 set more off, perm
 version 12
 
-global dirpath "S:/Fiona/Schools"
+global dirpath "T:/Projects/Schools"
 
 ** additional directory paths to make things easier
 global dirpath_data "$dirpath/Data"
@@ -19,6 +20,7 @@ global dirpath_data_temp "$dirpath/Data/Temp"
 global dirpath_data_other "$dirpath/Data/Other data"
 global dirpath_results_prelim "$dirpath/Results/Preliminary"
 ************************************************
+
 
 ** set up variables for regression outputs
 gen yvar = ""
@@ -40,18 +42,13 @@ gen r2 = .
 set obs 2000
 
 local row = 1
-foreach depvar in 0 4 7 9 10 11 {
+foreach depvar in 0 1 2 3 4 7 8 9 10 {
 foreach subsample in 0 3 6 12 13 {
 foreach postctrls in "" "post" {
   foreach blocks in any_post_treat upgr_counter_all {
    foreach spec in c f i m h j {
 	 {
-	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
-		continue
-	 }
-	 else if (`depvar'!=0 & `depvar'!=9) & ("`postctrls'"=="") {
-		continue
-	 }
+
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
@@ -79,7 +76,6 @@ foreach postctrls in "" "post" {
 	   local fes = "cds_code#block#month#prediction"
 	   replace spec = 4 in `row'
 	  }
-	  local ifs = ""
 	  if "`postctrls'" == "post" {
 	   local ctrls = "`ctrls' c.posttrain#prediction"
 	  } 
@@ -89,13 +85,7 @@ foreach postctrls in "" "post" {
 
 		  preserve
 		 
-		  if ("`depvar'"=="11") {
-			use "$dirpath_data_temp/monthly_by_block4_sample`subsample'.dta", clear
-			append using "$dirpath_data_temp/monthly_by_block10_sample`subsample'.dta"
-		  }
-		  else {
-			use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
-		  }
+		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
 		  
 		  if ("`depvar'"=="9") {
 			replace any_post_treat = prediction_error_treat9
@@ -104,32 +94,16 @@ foreach postctrls in "" "post" {
 		  keep if prediction_error != . & cumul_kwh != .
 		  
 		  * Davis estimator
-		  qui reghdfe cumul_kwh `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001)
+		  qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
 		  gen davis = -_b[`blocks']/(24*365)
 		  qui summ davis
 		  local davis = r(mean)
 		  
 		  * Regressions
-		  qui reghdfe prediction_error `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
+		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
 		  local se_mos = _se[`blocks']
 		  
-		  qui reghdfe prediction_error `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
-		  
-		  /* old code
-		  if ("`blocks'"=="any_post_treat") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-		  }
-		  else if ("`blocks'"=="upgr_counter_all") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			egen count_temp  = wtmean(upgr_counter_all) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = davis/count_temp
-			replace davis2 = -davis/(24*365)
-			drop count_temp
-		  }
-		  */
+		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
 		  
 		  restore 
 		  
@@ -158,15 +132,15 @@ foreach postctrls in "" "post" {
 		  if "`depvar'" == "7" {
 			replace ylab = "Prediction error (kWh) - Forest" in `row'
 		  }
+		  if "`depvar'" == "7" {
+			replace ylab = "Prediction error (kWh) - Forest Joint" in `row'
+		  }
 		  if "`depvar'" == "9" {
 			replace ylab = "Prediction error (kWh) - Double Lasso" in `row'
 		  }
 		  if "`depvar'" == "10" {
-			replace ylab = "Prediction error (kWh) - Post" in `row'
-		  }
-		  if "`depvar'" == "11" {
-			replace ylab = "Prediction error (kWh) - Pre/Post" in `row'
-		  }		  
+			replace ylab = "Prediction error (kWh) - Average" in `row'
+		  }  
 		  
 		  replace fe = "`fes'" in `row'
 		  replace clustering = "`clstrs'" in `row'

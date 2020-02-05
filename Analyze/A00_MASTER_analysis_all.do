@@ -2,6 +2,15 @@
 **** MASTER ANALYSIS FILE (CALLS ALL ANALYSIS FILES)
 ************************************************
 
+************************************************
+**** SETUP:
+clear all
+set more off, perm
+version 12
+
+global dirpath "T:/Projects/Schools"
+global dirpath_code_analysis "T:/Home/Mar/github/schools_git/Analyze"
+************************************************
 
 ******* TAKING STOCK. CURRENTLY MISSING:
 -- CODE TO PRODUCE BOOTSTRAPPED STANDARD ERRORS (ONLY THE TABLE)
@@ -12,9 +21,7 @@
 
 ** ANALYSIS FILES -- TABLES:
 
-do "$dirpath_code_analysis/Jul15_Selection"
-do "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"
-do "$dirpath_code_analysis/MASTER_main_monthly_regressions_savings.do"
+do "$dirpath_code_analysis/MASTER_selection_table_data.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
 do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
 do "$dirpath_code_analysis/MASTER_heterogeneity_analysis_monthlydata_empiricalbayes.do"
@@ -32,7 +39,7 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
 ** Table 1: Average characteristics of schools in the sample
 {
-do "$dirpath_code_analysis/Jul15_Selection"
+do "$dirpath_code_analysis/MASTER_selection_table_data.do"
 
 /*
 * inputs: 
@@ -476,4 +483,3 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
 * FINAL TABLE SAVED IN: "$dirpath_results_final/tab_aggregate_predictions_binary_davis_reguant_doublelasso.tex"
 }
-
