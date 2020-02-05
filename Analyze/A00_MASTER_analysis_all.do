@@ -490,6 +490,14 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
 ************************************************
 ** ANALYSIS FILES -- FIGURES:
+{
+do "$dirpath_code_analysis/MASTER_main_demographic_regressions_event.do"
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
+do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
+do "$dirpath_code_analysis/MASTER_mlestimators_levels_samples.do"
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_hourly.do"
+
 
 ** Figure 1: Locations of untreated and treated schools
 {
@@ -535,3 +543,131 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_event_yearly_BP.do"
 */
 }
 
+
+** Figure 3: Machine learning approach -- graphical intuition
+{
+// No standalone do-file required to produce results.
+
+* inputs: N/A
+* outputs: N/A
+
+* FINAL FIGURES SAVED IN: "$dirpath_results_final/fake_ml_intuition_paper.pdf"
+}
+
+** Figure 4: Machine learning diagnostics
+{
+// No standalone do-file required to produce results.
+
+/*
+*inputs: 
+ -- "$dirpath_data_int/schools_predictions_by_block.dta" [DOES THIS GET UPDATED?]
+ -- "$dirpath_data_int/schools_prediction_variables.dta" [WHERE IS THIS COMING FROM?]
+ -- "$dirpath_data_int/School specific/schoolid_cdscode_map.dta"
+ -- "$dirpath_data_int/ee_total_formerge.dta"
+ -- "$dirpath_data_temp/mean_energy_use.dta"
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [does this get updated?]
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [does this get updated?]
+ 
+* outputs: N/A
+ 
+* FINAL FIGURES SAVED IN:
+ -- "$dirpath_results_final/fig_ml_diagnostics_a.pdf"
+ -- "$dirpath_results_final/fig_ml_diagnostics_b.pdf"
+ -- "$dirpath_results_final/fig_ml_diagnostics_c.pdf"
+ -- "$dirpath_results_final/fig_ml_diagnostics_d.pdf"
+*/
+}
+
+** Figure 5: Comparison of methods across specifications and samples
+{
+// Average program estimates
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"
+
+* inputs: "$dirpath_data_temp/monthly_by_block`b'_sample`subsample'.dta
+* outputs: "$dirpath_data_int/RESULTS_monthly_allml_models.dta"
+
+// Average program estimates + school-specific estimates, monthly temperature
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
+
+/*
+* inputs: 
+ -- "$dirpath_data_temp/monthly_by_block`b'_sample`subsample'.dta
+ -- "$dirpath_data_int/school_weather_MASTER_monthly.dta"
+
+* outputs: "$dirpath_data_int/RESULTS_monthly_wtemperature.dta"
+*/
+
+* FINAL FIGURE SAVED IN: "$dirpath_results_final/fig_kdensities_betas_monthlyt.pdf"
+}
+
+** Figure 6: School-specific effects
+{
+// generate Empirical Bayes shrinkage estimates for all schools
+do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
+
+/*
+* inputs: 
+ -- "$dirpath_data_temp/monthly_by_block4_sample0.dta" [UPDATE ME!!! WE DON'T WANT THIS IN THERE]
+ -- "$dirpath_data_temp/monthly_by_block10_sample0.dta" [UPDATE ME!!! WE ONLY WANT THIS]
+ -- "$dirpath_data_int/School specific/schoolid_cdscode_map.dta" [WHERE DO I COME FROM?]
+
+* outputs:
+ -- "$dirpath_data_int/school_specific_slopes_flagged_robust.dta"
+*/
+
+/*
+* other inputs:
+ -- "$dirpath_data_int/ee_total_formerge.dta"
+ -- "$dirpath_data_temp/mean_energy_use.dta"
+ -- "$dirpath_data_int/School specific/cdscode_samplesize.dta" [WHERE DO I COME FROM?]
+ -- "$dirpath_data_temp/demographics_for_selection_regs.dta" [WHERE DO I COME FROM?]
+ */
+ 
+* FINAL FIGURE SAVED IN: "$dirpath_results_final/fig_school_specific_EB.pdf"
+}
+
+** Figure A.1: Comparing machine learning estimators
+{
+// Compute treatment effects with different groups of ML observations
+do "$dirpath_code_analysis/MASTER_mlestimators_levels_samples.do"
+
+/*
+* inputs:
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [HAS THIS GOTTEN UPDATED?]
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [HAS THIS GOTTEN UPDATED?]
+*/
+
+* outputs: "$dirpath_data_int/RESULTS_ml_estimators_levels_samples.dta"
+
+* FINAL FIGURE SAVED IN: "$dirpath_results_final/fig_ml_estimators_levels.pdf"
+}
+
+** Figure B.2: Machine learning results by hour (alternative prediction methods)
+{
+// Hour-specific ML regressions
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_hourly.do"
+
+* inputs: "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta"
+* outputs: "$dirpath_data_int/RESULTS_monthly_block.dta"
+
+* FINAL FIGURE SAVED IN: "$dirpath_results_final/Appendix/fig_blockwise_ml_levels_binary_mlalternatives_spec`s'.pdf"
+}
+
+** Figure B.3 is REDUNDANT (will be replaced by the updated Figure 5)
+
+** Figure B.4: Energy efficiency upgrades
+{
+// No standalone do-files required
+
+* inputs: "$dirpath_data_int/ee_clean_elec_noclusters.dta"
+* outputs: N/A
+
+/*
+* FINAL FIGURES SAVED IN:
+ -- "$dirpath_results_final/fig_eestats_A.pdf"
+ -- "$dirpath_results_final/fig_eestats_B.pdf"
+*/
+}
+
+** Figure B.5 is REDUNDANT (replaced by A.1)
+}
