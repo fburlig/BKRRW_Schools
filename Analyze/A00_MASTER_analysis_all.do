@@ -150,3 +150,61 @@ do "$dirpath_code_analysis/MASTER_heterogeneity_analysis_monthlydata_empiricalba
 * FINAL TABLE SAVED IN: "$dirpath_results_final/tab_heterogeneity_eb.tex"
 }
 
+
+** Table B.1: Panel FE (Alternative SEs)
+{
+// [CURRENTLY MISSING MAIN REGRESSIONS WITH MOS SE]
+// SHOULD GET ADDED TO "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"
+
+// [CURRENTLY MISSING BOOTSTRAPPED STANDARD ERRORS]
+// [THESE CAN BE GENERATED USING "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"]
+
+// Average program estimates, monthly temperature
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
+
+/*
+* inputs: 
+ -- "$dirpath_data_temp/monthly_by_block`b'_sample`subsample'.dta
+ -- "$dirpath_data_int/school_weather_MASTER_monthly.dta"
+
+* outputs: "$dirpath_data_int/RESULTS_monthly_wtemperature.dta"
+*/
+
+* FINAL TABLE SAVED IN: "$dirpath_results_final/Appendix/tab_aggregate_regressions_2wayclus_binary.tex"  
+
+}
+
+
+
+** Table B.2: Panel fixed effects results (average school specific estimates; outliers)
+{
+// Average school-specific estimates
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_savings.do"
+
+* inputs: "$dirpath_data_temp/monthly_by_block`b'_sample`subsample'.dta"
+* outputs: "$dirpath_data_int/RESULTS_monthly_savings.dta"
+
+// Average program estimates + school-specific estimates, monthly temperature
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
+
+/*
+* inputs: 
+ -- "$dirpath_data_temp/monthly_by_block`b'_sample`subsample'.dta
+ -- "$dirpath_data_int/school_weather_MASTER_monthly.dta"
+
+* outputs: "$dirpath_data_int/RESULTS_monthly_wtemperature.dta"
+*/
+
+* FINAL TABLE SAVED IN: "$dirpath_results_final/tab_aggregate_regressions_binary_reguant_samples.tex"  
+}
+
+** Table B.3: Matching results
+{
+// Matching regressions
+do "$dirpath_code_analyze/MASTER_main_monthly_regressions_matching.do"
+
+* inputs: "$dirpath_data_int/Matching/any_`districttype'_`matchtype'_FOR_REGRESSIONS_monthly.dta" [WHERE ARE THESE BUILT?]
+* outputs: "$dirpath_data_int/RESULTS_monthly_matching.dta"
+
+* FINAL TABLE SAVED IN: "$dirpath_results_final/Appendix/tab_matching_any_binary.tex"
+}
