@@ -1,28 +1,5 @@
-
 ************************************************
-* This file reads in the predictions from R
-
-* Treatment predictions do not seem to be working well (train vs test)
-* some also only have treated observations -- KEY TO FIGURE OUT
-
-************************************************
-**** SETUP:
-clear all
-memory clear
-set more off, perm
-version 12
-
-global dirpath "S:/Fiona/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
-
-
+**** ANALYSIS: ML ESTIMATORS (PRE-POST, TU, ETC)
 ************************************************
 
 **** Clean up prediction:

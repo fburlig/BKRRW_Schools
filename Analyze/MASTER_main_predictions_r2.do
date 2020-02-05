@@ -1,20 +1,5 @@
-
-clear all
-memory clear
-set more off, perm
-version 12
-
-global dirpath "S:/Fiona/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
-
-
+************************************************
+**** ANALYSIS: R^2 ACROSS PREDICTION METHODS
 ************************************************
 
 use "$dirpath_data_temp/newpred_formerge_by_block.dta", clear

@@ -1,5 +1,5 @@
 ************************************************
-**** RUNNING BOOTSTRAP RESULTS
+**** ANALYSIS: RUNNING BOOTSTRAP RESULTS
 ************************************************
 
 * set up variables for regression outputs

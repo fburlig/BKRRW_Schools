@@ -1,23 +1,5 @@
 ************************************************
-**** RUNNING REGRESSIONS MAIN RESULTS
-************************************************
-
-************************************************
-**** SETUP:
-clear all
-set more off, perm
-version 12
-
-global dirpath "T:/Projects/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_data_other "$dirpath/Data/Other data"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
+**** ANALYSIS: MONTHLY REGRESSIONS WITH DONUTS AND SAVINGS
 ************************************************
 
 ** set up variables for regression outputs

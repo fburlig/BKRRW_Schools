@@ -1,29 +1,10 @@
 ************************************************
-**** RUNNING REGRESSIONS MAIN RESULTS
-************************************************
-
-************************************************
-**** SETUP:
-clear all
-set more off, perm
-set matsize 4000
-version 12
-
-global dirpath "T:/Projects/Schools"
-
-** additional directory paths to make things easier
-global dirpath_data "$dirpath/Data"
-global dirpath_data_raw "$dirpath/Data/Raw"
-global dirpath_data_int "$dirpath/Data/Intermediate"
-global dirpath_data_final "$dirpath/Data/Final"
-global dirpath_data_temp "$dirpath/Data/Temp"
-global dirpath_data_other "$dirpath/Data/Other data"
-global dirpath_results_prelim "$dirpath/Results/Preliminary"
+**** ANALYSIS: EMPIRICAL BAYES
 ************************************************
 
 use "$dirpath_data_temp/monthly_by_block4_sample0.dta", clear
 append using "$dirpath_data_temp/monthly_by_block10_sample0.dta"
-merge m:1 cds_code using "$dirpath_data_int\School specific\schoolid_cdscode_map.dta", keep(3) nogenerate
+merge m:1 cds_code using "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", keep(3) nogenerate
 
 sum school_id, det
 

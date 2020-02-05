@@ -2,16 +2,6 @@
 **** MASTER ANALYSIS FILE (CALLS ALL ANALYSIS FILES)
 ************************************************
 
-************************************************
-**** SETUP:
-clear all
-set more off, perm
-version 12
-
-global dirpath "T:/Projects/Schools"
-global dirpath_code_analysis "T:/Home/Mar/github/schools_git/Analyze"
-************************************************
-
 ******* TAKING STOCK. CURRENTLY MISSING:
 -- CODE TO PRODUCE BOOTSTRAPPED STANDARD ERRORS (ONLY THE TABLE)
 
