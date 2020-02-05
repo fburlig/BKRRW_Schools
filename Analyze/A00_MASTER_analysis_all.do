@@ -506,14 +506,32 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 /*
 * FINAL FIGURES SAVED IN: 
  -- "$dirpath_results_final/utilitymap_conly.pdf"
- -- "$dirpath_results_final/utilitymap_conly.pdf"
+ -- "$dirpath_results_final/utilitymap_tonly.pdf"
  */
 }
 
 ** Figure 2: School characteristics before and after treatment
 {
+// Demographic event studies
+do "$dirpath_code_analysis/MASTER_main_demographic_regressions_event.do"
+* inputs: 
+ -- "$dirpath_data_temp/monthly_by_block0_sample0.dta"
+ -- "$dirpath_data/Other data/CA school info/ca_school_data.dta" [WHERE DOES THIS DTA COME FROM]
 
+* outputs: "$dirpath_data_int/RESULTS_demographic_eventstudies.dta"
 
+// Energy event study
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_event_yearly_BP.do"
+* inputs: "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta"
+* outputs: "$dirpath_data_int/RESULTS_monthly_eventstudies_yearly_BP.dta"
 
+/*
+* FINAL FIGURES SAVED IN:
+ -- "$dirpath_results_final/fig_eventstudy_demographics_enrtotal_BP.pdf"
+ -- "$dirpath_results_final/fig_eventstudy_demographics_stafftotal_BP.pdf"
+ -- "$dirpath_results_final/fig_eventstudy_demographics_mathproficient_BP.pdf"
+ -- "$dirpath_results_final/fig_eventstudy_demographics_elaproficient_BP.pdf"
+ -- "$dirpath_results_final/Appendix/fig_eventstudy_allspecs_dd_levels_BP.pdf"
+*/
 }
 
