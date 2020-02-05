@@ -47,4 +47,6 @@ do "$dirpath_code_build/B11_MASTER_is_coastal.do"
 *** Generate a HVAC/Light treatment indicator for heterogeneity regressions
 do "$dirpath_code_build/B12_MASTER_hvac_light_assignment.do"
 
+*** Generate data for matching analysis // NEEDS SOME ATTENTION
+do "$dirpath_code_build/B13_MASTER_matching.do"
 
