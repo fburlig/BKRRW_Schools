@@ -33,14 +33,15 @@ global dirpath_results_prelim "$dirpath/Results/Preliminary"
 global dirpath_results_final "$dirpath/Results/Final"
 
 ************************************************
-
 ************************************************
+
 ** Required programs:
 /*
  -- unique
  -- geonear
  -- gsort
  -- reghdfe
+ -- gtools
 
 */
 ************************************************
