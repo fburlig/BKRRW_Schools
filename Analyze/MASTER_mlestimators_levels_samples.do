@@ -44,7 +44,7 @@ gen spec_desc = ""
 
 ************************************************
 
-sort treatment_school posttrain cds_code
+gsort treatment_school posttrain cds_code
 local row = 1
 
 **** alternative estimators
@@ -53,8 +53,8 @@ foreach spec in 1 2 3 4 7 8 9 10 {
 local depvar = "prediction_error`spec'"
 
 * update sample3 definition
-cap byte drop sample3
-gen sample3 = 0
+cap drop sample3
+gen byte sample3 = 0
 gegen p1_error = pctile(`depvar'), p(1) by(treatment_school posttrain)
 gegen p99_error = pctile(`depvar'), p(99) by(treatment_school posttrain)
 replace sample3 = 1 if `depvar' > p1_error & `depvar' < p99_error

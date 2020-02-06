@@ -28,7 +28,7 @@ forvalues bs = 1(1)20 {
 }
 
 local row = 1
-foreach subsample in 0 {
+local subsample = 0
 
 	* read data
 	gen bs_sample = ""
@@ -37,11 +37,17 @@ foreach subsample in 0 {
 		replace bs_sample = "`depvar'" if bs_sample==""
 	}
 	gegen clusterid = group(cds_code bs_sample)
-
+	gsort clusterid
+	
+	* Davis denominator
+	replace cumul_kwh = - cumul_kwh / (24*365)
+	by clusterid: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+	replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
+ 
 	gunique cds_code
 	local numschools = r(unique)
 
-	keep yvar-r2 clusterid prediction_error cumul_kwh any_post_treat month block month_of_sample numobs
+	keep yvar-r2 clusterid prediction_error cumul_kwh* any_post_treat month block month_of_sample numobs
 
 	foreach spec in f i m h j {
 		
@@ -90,11 +96,6 @@ foreach subsample in 0 {
 		  * could weight by length of school data
 		  bsample `numschools', cluster(clusterid)
 		  
-		  * Davis denominator
-		  replace cumul_kwh = - cumul_kwh / (24*365)
-		  by clusterid: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
-		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
-		  
 		  qui reghdfe cumul_kwh_binary any_post_treat `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
 		  local davis = _b[any_post_treat]
 		  
@@ -124,7 +125,6 @@ foreach subsample in 0 {
 	  
 	  }
 	}
-}
 
 keep yvar - r2
 keep if yvar != ""
