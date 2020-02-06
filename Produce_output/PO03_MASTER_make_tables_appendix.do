@@ -196,7 +196,6 @@ file close myfile
 }
 
 ** Table B.4: R^2s of prediction models across ML methods
-// UPDATE ME TO ALSO INCLUDE PRED10?
 {
 
 use "$dirpath_data_int/varied_ml_methods_r2_post.dta", clear
@@ -788,14 +787,23 @@ file close myfile
 ** Table B.11: Panel fixed effects results (continuous treatment variable)
 // add temperature?
 {
-use "$dirpath_data_int/RESULTS_monthly.dta", clear
+use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
+replace spec = 7 if spec == 6
+keep if spec==7
+keep if xvar == "davis continuous (counter)" & yvar == "qkw_hour" & subsample == "0"
+
+append using "$dirpath_data_int/RESULTS_monthly.dta"
 keep if xvar =="davis continuous (counter)" & yvar == "qkw_hour" & subsample== "0"
 replace spec = spec-1
 gen estimator = "davis"
 tempfile davis
 save "`davis'"
 
-use "$dirpath_data_int/RESULTS_monthly_savings.dta", clear
+use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
+replace spec = 7 if spec == 6
+keep if spec==7
+keep if xvar == "savings continuous" & yvar == "qkw_hour" & subsample == "0"
+append using  "$dirpath_data_int/RESULTS_monthly_savings.dta"
 keep if xvar =="savings continuous" & yvar == "qkw_hour" & subsample== "0"
 local nspec 5
 replace spec = spec-1
