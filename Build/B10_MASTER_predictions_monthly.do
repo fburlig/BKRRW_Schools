@@ -54,7 +54,6 @@ use "$dirpath_data_temp/newpred_formerge_by_block.dta", clear
 merge m:1 cds_code date block using "$dirpath_data_int/full_analysis_data_trimmed.dta", keep(3) nogen
 compress
 
-gen qkw_hour = prediction_error0
 save "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta", replace
 
 ********************************************************************************

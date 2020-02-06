@@ -26,6 +26,7 @@ do "$dirpath_code_build/B07_MASTER_export_data_to_R.do"
 ***************************************************
 ***************************************************
 
+*** (takes ~one week if bootstrap included)
 di "need to run R here"
 stop
 
@@ -35,7 +36,7 @@ stop
 *** Prepare treatment variables and some covariates
 do "$dirpath_code_build/B08_MASTER_prep_treatment_vars.do" 
 
-*** Read prediction data into Stata
+*** Read prediction data into Stata (takes ~24 hours if bootstrap included)
 do "$dirpath_code_build/B09_MASTER_predictions_build.do"
  
 *** Collapse predictions to the month-hour level; add covariates/samples; split by prediction type
@@ -49,4 +50,3 @@ do "$dirpath_code_build/B12_MASTER_hvac_light_assignment.do"
 
 *** Generate data for matching analysis // NEEDS SOME ATTENTION
 do "$dirpath_code_build/B13_MASTER_matching.do"
-

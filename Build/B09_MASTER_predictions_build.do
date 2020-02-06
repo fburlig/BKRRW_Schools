@@ -9,8 +9,6 @@ di `schoolidmax'
 
 local build_forest = 0
 local build_dl = 0
-local build_post = 0
-local build_prediction_old = 1
 local build_prediction = 0
 local build_varnames = 0
 
@@ -23,7 +21,7 @@ di `i'
 cap rm school_data_`i'_prediction_forest.dta
 cap {
 
-	insheet using "$dirpath_data_int/School specific/forest/school_data_`i'_prediction_fix.csv", clear comma
+	insheet using "$dirpath_data_int/School specific/forest/school_data_`i'_prediction.csv", clear comma
 
 	compress
 	save "$dirpath_data_int/School specific/forest/school_data_`i'_prediction_forest.dta", replace	
@@ -40,77 +38,7 @@ forvalues i = 1(1)`schoolidmax' {
 }
 compress
 cap drop v1 num*
-save "$dirpath_data_int/schools_predictions_forest_fix.dta", replace
-}
-***
-
-if (`build_post'==1) {
-
-*** PREDICTIONS BY BLOCKS *POST*
-clear
-cd "$dirpath_data_int/School specific/post"
-forvalues i = 1(1)`schoolidmax' {
-di `i'
-forvalues b = 0(1)23 {
-cap rm school_data_`i'_prediction_post`b'.dta
-cap{
-
-	insheet using "$dirpath_data_int/School specific/post/school_data_`i'_prediction_post_block`b'.csv", clear comma
-	
-	cap drop spline*
-	cap drop min_frac
-	cap drop x
-	cap drop holiday sunrise sunset weekday 
-	cap drop frac* upgr*
-	cap drop v1
-	
-	*data cleaning
-	gen qkw_log = log(qkw_hour)
-	rename qkw_hour qkw
-
-	* censoring prediction to avoid waky splines out of sample, generate errors
-	forvalues m = 1(1)7 {
-		cap {
-			replace prediction`m' = 0 if prediction`m' < 0
-			replace prediction`m' = 1500 if prediction`m' > 1500
-			gen prediction_error`m' = qkw - prediction`m' 
-			*replace prediction_log`m' = -10.0 if prediction_log`m' < -10
-			*replace prediction_log`m' = 10.0 if prediction_log`m' > 10
-			*gen prediction_error_log`m' = qkw_log - prediction_log`m' 
-		}
-	}
-	
-	* create other variables
-	egen train_percent = mean(trainindex)
-
-	keep date block school_id qkw_log prediction_error* train_percent trainindex
-		
-	compress
-	save "$dirpath_data_int/School specific/post/school_data_`i'_prediction_post`b'.dta", replace	
-	
-}
-}
-}
-
-
-clear
-cap rm $dirpath_data_int/schools_predictions_by_block_post.dta
-cd "$dirpath_data_int/School specific/post"
-set obs 1
-forvalues i = 1(1)`schoolidmax' {
-forvalues b = 0(1)23 {
-	 cap append using "school_data_`i'_prediction_post`b'.dta"
-}
-}
-compress
-save "$dirpath_data_int/schools_predictions_by_block_post.dta", replace
-
-
-keep date block school_id qkw_log prediction_error_log4 prediction_error4 train_percent trainindex
-rename prediction_error4 prediction_error10
-rename prediction_error_log4 prediction_error_log10
-save "$dirpath_data_int/schools_predictions_by_block_post_for_merge.dta", replace
-
+save "$dirpath_data_int/schools_predictions_forest.dta", replace
 }
 ***
 
@@ -178,7 +106,7 @@ cap {
 	insheet using "$dirpath_data_int/School specific/prediction/school_data_`i'_bootstrap`b'.csv", clear comma
 	save "$dirpath_data_temp/bootstrap.dta", replace
 	
-	insheet using "$dirpath_data_int/School specific/prediction/school_data_`i'_prediction_block_fix`b'.csv", clear comma	
+	insheet using "$dirpath_data_int/School specific/prediction/school_data_`i'_prediction_block`b'.csv", clear comma	
 	merge 1:1 date using "$dirpath_data_temp/bootstrap.dta", nogen
 	
 	gen block = `b' 
@@ -191,10 +119,7 @@ cap {
 		cap {
 			replace prediction`m' = 0 if prediction`m' < 0
 			replace prediction`m' = 1500 if prediction`m' > 1500
-			gen prediction_error`m' = qkw - prediction`m' 			
-			*replace prediction_log`m' = -10.0 if prediction_log`m' < -10
-			*replace prediction_log`m' = 10.0 if prediction_log`m' > 10
-			*gen prediction_error_log`m' = qkw_log - prediction_log`m' 
+			gen prediction_error`m' = qkw - prediction`m'
 		}
 	}
 	
@@ -229,16 +154,12 @@ compress
 * add forests without forced blocks, double lasso and post
 merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_forest.dta", keep(1 3) nogen keepusing(prediction8)
 merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_by_block_dl.dta", keep(1 3) nogen
-*merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_by_block_post_for_merge.dta", keep(1 3) nogen
 
 * clean up forest predictions
 local m = 8
 replace prediction`m' = 0 if prediction`m' < 0
 replace prediction`m' = 1500 if prediction`m' > 1500
 gen prediction_error`m' = qkw - prediction`m' 
-*replace prediction_log`m' = -10.0 if prediction_log`m' < -10
-*replace prediction_log`m' = 10.0 if prediction_log`m' > 10
-*gen prediction_error_log`m' = qkw_log - prediction_log`m' 
 
 cap drop prediction? 
 cap drop prediction_log?
@@ -248,60 +169,6 @@ cap drop train_percent
 
 order school_id block date trainindex qkw
 save "$dirpath_data_int/schools_predictions_by_block.dta", replace
-
-}
-***
-
-if (`build_prediction_old'==1) {
-*** PREDICTIONS BY BLOCKS
-clear
-cd "$dirpath_data_int/School specific/prediction"
-forvalues i = 1(1)`schoolidmax' {
-di `i'
-forvalues b = 0(1)23 {
-cap {
-	
-	insheet using "$dirpath_data_int/School specific/prediction/old/school_data_`i'_prediction_block_old`b'.csv", clear comma
-	
-	gen block = `b' 
-	
-	*data cleaning
-	rename qkw_hour qkw
-
-	* censoring prediction to avoid waky splines out of sample, generate errors
-	forvalues m = 1(1)7 {
-		cap {
-			replace prediction`m' = 0 if prediction`m' < 0
-			replace prediction`m' = 1500 if prediction`m' > 1500
-			gen prediction_error`m' = qkw - prediction`m' 			
-			*replace prediction_log`m' = -10.0 if prediction_log`m' < -10
-			*replace prediction_log`m' = 10.0 if prediction_log`m' > 10
-			*gen prediction_error_log`m' = qkw_log - prediction_log`m' 
-		}
-	}
-	
-	keep date block school_id qkw prediction_error* trainindex
-
-	compress
-	save "$dirpath_data_int/School specific/prediction/old/school_data_`i'_prediction`b'_old.dta", replace	
-	
-}
-}
-}
-****
-
-clear
-cap rm $dirpath_data_int/schools_predictions_by_block_old.dta
-cd "$dirpath_data_int/School specific/prediction/old"
-forvalues i = 1(1)`schoolidmax' {
-forvalues b = 0(1)23 {
-	cap append using "school_data_`i'_prediction`b'_old.dta"
-}
-}
-compress
-
-order school_id block date trainindex qkw qkw_log
-save "$dirpath_data_int/schools_predictions_by_block_old.dta", replace
 
 }
 ***
