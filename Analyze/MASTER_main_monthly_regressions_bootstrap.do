@@ -92,11 +92,11 @@ foreach subsample in 0 {
 		  
 		  * Davis denominator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
-		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+		  by clusterid: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
 		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
 		  qui reghdfe cumul_kwh_binary any_post_treat `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-		  gen davis = _b[any_post_treat]
+		  local davis = _b[any_post_treat]
 		  
 		  qui summ davis
 		  local davis = r(mean)

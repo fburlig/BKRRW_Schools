@@ -78,17 +78,8 @@ foreach postctrls in "" "post" {
 
 		  preserve
 		  
-		  if ("`depvar'"=="11") {
-			use "$dirpath_data_temp/monthly_by_block4_sample`subsample'.dta", clear
-			append using "$dirpath_data_temp/monthly_by_block10_sample`subsample'.dta"
-		  }
-		  else {
-			use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
-		  }
-
-		  if ("`depvar'"=="9") {
-			replace any_post_treat = prediction_treat_error9
-		  }
+		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
+		  
 		  
 		  qui reghdfe prediction_error block#c.`blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
 		  

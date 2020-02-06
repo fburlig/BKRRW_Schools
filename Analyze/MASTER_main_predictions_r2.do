@@ -3,11 +3,11 @@
 ************************************************
 
 use "$dirpath_data_temp/newpred_formerge_by_block.dta", clear
+drop prediction_error*bs*
+
 merge m:1 cds_code date block using "$dirpath_data_int/full_analysis_data_trimmed.dta", keep(3) nogen
 
 keep cds_code block posttrain date qkw prediction_error* any_post_treat
-
-gen log_kwh = log(qkw)
 
 gegen byte treatment_school = max(any_post_treat), by(cds_code)
 gen byte treatment_on = 0
@@ -18,18 +18,10 @@ gegen groupid = group(cds_code block posttrain)
 gegen p2mean = mean(qkw), by(groupid) 
 gen y2 = (qkw-p2mean)^2
 
-gegen p2meanlog = mean(log_kwh), by(groupid) 
-gen y2_log = (log_kwh-p2meanlog)^2
-		
-forvalues i = 1(1)8{
-foreach v in "prediction_error" "prediction_error_log" {
+foreach i in 1 2 3 4 7 8 9 10 {
+foreach v in "prediction_error" {
 		
 		local depvar = "`v'`i'"
-		
-		local tail = ""
-		if "`v'" == "prediction_error_log" {
-			local tail = "_log"
-		}
 		
 		* clean up outlier
 		gquantiles _p_error = `depvar', xtile nquantiles(100) by(groupid) strict
@@ -39,14 +31,14 @@ foreach v in "prediction_error" "prediction_error_log" {
 		drop _p_error
 
 		gegen e2mean = mean(`depvar'), by(groupid) 
-		gen e2`tail'`i'= (`depvar'-e2mean)^2
+		gen e2`i'= (`depvar'-e2mean)^2
 		drop e2mean
 		
 }
 }
 
 * create variables for correlaion
-foreach var of varlist prediction_error? prediction_error_log?  {
+foreach var of varlist prediction_error*  {
 	gen sd_`var' = `var'
 }
 
@@ -54,11 +46,9 @@ foreach var of varlist prediction_error? prediction_error_log?  {
 gcollapse (mean) prediction_error* (sd) sd* (sum) e2* y2*, by(cds_code treatment_school block posttrain)
 
 * r2 by school-block-posttrain
-foreach tail in "" "_log" {
-forvalues i = 1(1)8{
-	gen r2`tail'`i' = 1 - e2`tail'`i'/y2`tail'
-	drop e2`tail'`i'
-}
+foreach i in 1 2 3 4 7 8 9 10 {
+	gen r2`i' = 1 - e2`i'/y2
+	drop e2`i'
 }
 drop y2*
 
