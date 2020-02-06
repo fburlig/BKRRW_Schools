@@ -16,7 +16,8 @@ do "$dirpath_code_analysis/MASTER_selection_table_data.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
 do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
 do "$dirpath_code_analysis/MASTER_heterogeneity_analysis_monthlydata_empiricalbayes.do"
-do "$dirpath_code_analysis/MASTER_monthly_regressions.do"
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions.do"
+do "$dirpath_code_analysis/MASTER_main_monthly_regressions_bootstrap.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_matching.do"
 do "$dirpath_code_analysis/MASTER_main_predictions_r2.do"
 do "$dirpath_code_analysis/MASTER_monthly_regressions_bonds.do"
@@ -27,7 +28,6 @@ do "$dirpath_code_analysis/MASTER_main_hourly_regressions_temperature_saving_jae
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_collapses.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
-
 ** Table 1: Average characteristics of schools in the sample
 {
 do "$dirpath_code_analysis/MASTER_selection_table_data.do"
@@ -37,9 +37,9 @@ do "$dirpath_code_analysis/MASTER_selection_table_data.do"
  -- "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta"
  -- "$dirpath_data_raw/PGE_LEA_match/PGE LEA Meter Matching 20150624.xlsx"
  -- "$dirpath_data_other/Demographics/Approved CA District Facilities Bonds.xlsx"
- -- "$dirpath_data_other/Demographics/schools_comparison_no_weights.dta" [WHERE DOES THIS COME FROM?]
- -- "$dirpath_data_other/Demographics/data_presidential_county.dta" [WHERE DOES THIS COME FROM?]
- -- "$dirpath_data_temp/school_treatdates.dta" [WHERE DOES THIS COME FROM?]
+ -- "$dirpath_data_other/Demographics/schools_comparison_no_weights.dta"
+ -- "$dirpath_data_other/Demographics/data_presidential_county.dta"
+ -- "$dirpath_data_temp/school_treatdates.dta"
  -- "$dirpath_data_int/ee_total_formerge.dta"
  -- "$dirpath_data_int/hvac_light_pure.dta" 
 
@@ -149,7 +149,7 @@ do "$dirpath_code_analysis/MASTER_empirical_bayes_singletons_cluster.do"
 * inputs: 
  -- "$dirpath_data_temp/monthly_by_block4_sample0.dta" [UPDATE ME!!! WE DON'T WANT THIS IN THERE]
  -- "$dirpath_data_temp/monthly_by_block10_sample0.dta" [UPDATE ME!!! WE ONLY WANT THIS]
- -- "$dirpath_data_int/School specific/schoolid_cdscode_map.dta" [WHERE DO I COME FROM?]
+ -- "$dirpath_data_int/School specific/schoolid_cdscode_map.dta"
 
 * outputs:
  -- "$dirpath_data_int/school_specific_slopes_flagged_robust.dta"
@@ -186,7 +186,7 @@ do "$dirpath_code_analysis/MASTER_monthly_regressions.do"
 * outputs: "$dirpath_data_int/RESULTS_monthly.dta"
 
 // [CURRENTLY MISSING BOOTSTRAPPED STANDARD ERRORS]
-// [THESE CAN BE GENERATED USING "$dirpath_code_analysis/MASTER_main_monthly_regressions_allpredictions.do"]
+// [THESE CAN BE GENERATED USING "$dirpath_code_analysis/MASTER_main_monthly_regressions_bootstrap.do"]
 
 // Average program estimates, monthly temperature
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_temperature.do"
@@ -245,7 +245,7 @@ do "$dirpath_code_analysis/MASTER_main_predictions_r2.do"
 
 /*
 * inputs: 
- -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [MAKE SURE I GET UPDATED]
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta" 
  -- "$dirpath_data_int/full_analysis_data_trimmed.dta"
 * outputs: "$dirpath_data_int/varied_ml_methods_r2_post.dta"
 */
@@ -390,8 +390,8 @@ do "$dirpath_code_analysis/MASTER_main_hourly_regressions_noT_saving_jaere.do"
 
 /*
 * inputs: 
- -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [CHECK THIS GOT UPDATED FOR NEW RESULTS]
- -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [CHECK THIS DIDN'T NEED TO BE UPDATED FOR NEW RESULTS]
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta"
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta"
  -- "$dirpath_data_int/ee_total_formerge.dta"
  -- "$dirpath_data_temp/mean_energy_use.dta"
  
@@ -403,8 +403,8 @@ do "$dirpath_code_analysis/MASTER_main_hourly_regressions_temperature_saving_jae
 
 /*
 * inputs: 
- -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [CHECK THIS GOT UPDATED FOR NEW RESULTS]
- -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [CHECK THIS DIDN'T NEED TO BE UPDATED FOR NEW RESULTS]
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta"
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta"
  -- "$dirpath_data_int/ee_total_formerge.dta"
  -- "$dirpath_data_temp/mean_energy_use.dta"
 
@@ -421,8 +421,8 @@ do "$dirpath_code_analysis/MASTER_main_hourly_regressions_noT_saving_jaere.do"
 
 /*
 * inputs: 
- -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [CHECK THIS GOT UPDATED FOR NEW RESULTS]
- -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [CHECK THIS DIDN'T NEED TO BE UPDATED FOR NEW RESULTS]
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta"
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta"
  -- "$dirpath_data_int/ee_total_formerge.dta"
  -- "$dirpath_data_temp/mean_energy_use.dta"
  
@@ -549,13 +549,13 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_event_yearly_BP.do"
 
 /*
 *inputs: 
- -- "$dirpath_data_int/schools_predictions_by_block.dta" [DOES THIS GET UPDATED?]
- -- "$dirpath_data_int/schools_prediction_variables.dta" [WHERE IS THIS COMING FROM?]
+ -- "$dirpath_data_int/schools_predictions_by_block.dta" 
+ -- "$dirpath_data_int/schools_prediction_variables.dta" 
  -- "$dirpath_data_int/School specific/schoolid_cdscode_map.dta"
  -- "$dirpath_data_int/ee_total_formerge.dta"
  -- "$dirpath_data_temp/mean_energy_use.dta"
- -- "$dirpath_data_temp/newpred_formerge_by_block.dta" [does this get updated?]
- -- "$dirpath_data_int/full_analysis_data_trimmed.dta" [does this get updated?]
+ -- "$dirpath_data_temp/newpred_formerge_by_block.dta"
+ -- "$dirpath_data_int/full_analysis_data_trimmed.dta"
  
 * outputs: N/A
  

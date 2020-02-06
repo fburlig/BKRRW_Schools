@@ -75,8 +75,12 @@ foreach postctrls in "" "post" {
 		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
 		  local davis = .
-		  if (!strmatch("`blocks'","*kwh*")) {
+		  if (strmatch("`blocks'","any_post_treat")) {
 			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
+		  if (strmatch("`blocks'","upgr_counter_all")) {
+			qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
 			local davis = _b[`blocks']
 		  }
 		  
@@ -146,12 +150,5 @@ foreach postctrls in "" "post" {
 
 keep yvar - r2
 keep if yvar != ""
-gen tscore_aggregate = beta_aggregate / se_aggregate
-gen pvalue_aggregate = 2*normal(-abs(tscore_aggregate))
-gen stars_aggregate = "^{*}" if pvalue_aggregate < 0.1
-replace stars_aggregate = "^{**}" if pvalue_aggregate < 0.05
-replace stars_aggregate = "^{***}" if pvalue_aggregate < 0.01
-gen ci95_lo_aggregate = beta_aggregate - 1.96*se_aggregate
-gen ci95_hi_aggregate = beta_aggregate + 1.96*se_aggregate
-
+gen rate = beta_aggregate / davis_denominator
 save "$dirpath_data_int/RESULTS_monthly.dta", replace

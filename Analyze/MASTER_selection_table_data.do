@@ -5,7 +5,6 @@
 ** needs to be done AFTER the build files so that we can grab the right datasets
 ** grab true/randomized treat dates
 use "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta", clear
-*append using "$dirpath_data_temp/full_blocks_any_newpred_by_block_post.dta"
 keep cds_code date cumul_kwh posttrain
 egen treat_date_tc = min(date) if posttrain == 1 | cumul_kwh > 0, by(cds_code)
 keep treat_date_tc cds_code
@@ -59,7 +58,6 @@ save "$dirpath_data_other/Demographics/bond_data.dta", replace
 **** Import data:
 
 use "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta", clear
-*append using "$dirpath_data_temp/full_blocks_any_newpred_by_block_post.dta"
 collapse(min) date (mean) qkw_hour temp_f *_kwh (median) qkw_median=qkw_hour (p75) qkw_p25=qkw_hour (p25) qkw_p75=qkw_hour, by(cds_code)
 
 * we can only run selection regs on the things we actually have demographics for

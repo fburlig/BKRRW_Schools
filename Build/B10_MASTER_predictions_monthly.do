@@ -2,6 +2,9 @@
 **** PREP PREDICTIONS DATA AND COLLAPSE TO MONTH-HOUR
 ************************************************
 
+********************************************************************************
+* Clean predictions and merge with temperature and upgrade variables
+
 use "$dirpath_data_int/schools_predictions_by_block.dta", clear
 
 rename qkw prediction_error0
@@ -51,8 +54,13 @@ use "$dirpath_data_temp/newpred_formerge_by_block.dta", clear
 merge m:1 cds_code date block using "$dirpath_data_int/full_analysis_data_trimmed.dta", keep(3) nogen
 compress
 
+gen qkw_hour = prediction_error0
+save "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta", replace
 
-** CREATE SUBSAMPLE VARIABLES
+********************************************************************************
+** CREATE SUBSAMPLE VARIABLES and MONTHLY COLLAPSE
+
+use "$dirpath_data_temp/full_blocks_any_newpred_by_block.dta", clear
 gen byte sample0 = 1
 
 merge m:1 cds_code using "$dirpath_data_int/ee_total_formerge.dta", keep(3) nogen

@@ -59,18 +59,8 @@ restore
 
 merge m:1 cds_code using "$dirpath_data_temp/mean_energy_use.dta", nogen
 
-preserve
 keep date block cds_code qkw_hour temp_f tot_kwh cumul_kwh upgr_counter_all ///
 	cumul_kwh_hvac upgr_counter_hvac cumul_kwh_light upgr_counter_light ///
 	any_post_treat
 compress
 save "$dirpath_data_int/full_analysis_data_trimmed.dta", replace
-restore
-
-preserve
-{
-gen savings_any = -(any_post_treat * tot_kwh) / (24 * 365)
-compress
-save "$dirpath_data_int/full_analysis_data_blocks_ANY.dta", replace
-}
-restore, preserve
