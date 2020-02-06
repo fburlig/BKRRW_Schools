@@ -309,7 +309,6 @@ do "$dirpath_code_analysis/MASTER_main_monthly_regressions_BONDS.do"
 * outputs: "$dirpath_data_int/RESULTS_monthly_BONDS.dta"
 
 * FINAL TABLE SAVED IN: "$dirpath_results_final/tab_aggregate_regressions_bonds.tex"
- // [CHECK ME: THE MAKE TABLES FILE IS READING IN WITH THE WRONG FILE]
 }
 
 ** Table B.9: Panel fixed effects results (donuts)
