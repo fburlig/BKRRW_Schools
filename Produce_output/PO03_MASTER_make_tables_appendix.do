@@ -6,19 +6,13 @@
 // THIS STILL NEEDS TO BE UPDATED WITH THE BOOTSTRAP SE
 
 ** Table B.2: Panel FE results (average school specific estimates; outliers)
-// needs to be updated to be all monthly
 {
-use "$dirpath_data_int/RESULTS_hourly_withtemp_savings.dta", clear
+use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
 keep if spec==7
-replace xvar = "savings binary" if beta >= 0
-
-keep if xvar == "savings binary"
-drop if strpos(fe, "##c.temp")
+keep if xvar == "reguant binary"
+replace xvar = "savings binary" if xvar == "reguant binary"
 append using "$dirpath_data_int/RESULTS_monthly_savings.dta"
-keep if xvar =="savings binary" & yvar == "qkw_hour" 
-replace spec = spec-1
-
 
 keep if xvar =="savings binary" & yvar == "qkw_hour" 
 
@@ -210,7 +204,7 @@ use "$dirpath_data_int/varied_ml_methods_r2_post.dta", clear
 
 keep if posttrain == 1 & treatment_school == 0
 
-local ntypes "1 2 3 4 7 8"
+local ntypes "1 2 3 4 7 8 10"
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_mlmethods_r2.tex", write replace
@@ -290,11 +284,11 @@ file write myfile "90th percentile  "
 	
 	file write myfile "\midrule " _n 
 
-file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF \\" _n
-file write myfile "Basic variables & X & X & X & X & X & X \\" _n
-file write myfile "Hour-specific model & X & X & X & X & X &  \\" _n
-file write myfile "Untreated schools $-i$  & &  & X & X &  &  \\" _n
-file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  &  \\" _n
+file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF & AVG\\" _n
+file write myfile "Basic variables & X & X & X & X & X & X  & \\" _n
+file write myfile "Hour-specific model & X & X & X & X & X &  & \\" _n
+file write myfile "Untreated schools $-i$  & &  & X & X &  &  & \\" _n
+file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  & & \\" _n
 
 file write myfile "\bottomrule " _n 
 file write myfile "\end{tabular*}" _n
