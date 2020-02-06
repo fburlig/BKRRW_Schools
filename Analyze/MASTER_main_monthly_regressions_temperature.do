@@ -1,7 +1,7 @@
 ************************************************
 **** ANALYSIS: MONTHLY REGRESSIONS INCLUDING TEMPERATURE
 ************************************************
-
+clear
 ** set up variables for regression outputs
 gen yvar = ""
 gen ylab = ""
@@ -23,12 +23,12 @@ gen r2 = .
 set obs 2000
 
 local row = 1
-foreach depvar in  4 /*7 9 10 11*/ {
+foreach depvar in 0 /*7 9 10 11*/ {
 foreach subsample in 0 3 6 12 13  {
 foreach postctrls in ""  {
-  foreach blocks in any_post_treat cumul_kwh_binary /*upgr_counter_all*/ {
+  foreach blocks in any_post_treat cumul_kwh_binary upgr_counter_all cumul_kwh {
    foreach spec in c f i m h j {
-	 /*
+	 
 	 {
 	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
 		continue
@@ -36,7 +36,7 @@ foreach postctrls in ""  {
 	 else if (`depvar'!=0 & `depvar'!=9) & ("`postctrls'"=="") {
 		continue
 	 }
-	 */
+	 }
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
@@ -87,8 +87,8 @@ foreach postctrls in ""  {
 		  if ("`depvar'"=="9") {
 			replace any_post_treat = prediction_error_treat9
 		  }
-		  
-		  merge 1:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
+		  gen prediction = 1
+		  merge m:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
 		  
 		  		  * Davis denominator
 		  if ("`blocks'"=="any_post_treat") {
