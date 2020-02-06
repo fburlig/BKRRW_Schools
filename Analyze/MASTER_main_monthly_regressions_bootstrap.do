@@ -3,6 +3,7 @@
 ************************************************
 
 * set up variables for regression outputs
+clear
 gen yvar = ""
 gen ylab = ""
 gen xvar = ""
@@ -27,7 +28,7 @@ forvalues bs = 1(1)20 {
 }
 
 local row = 1
-foreach subsample in 0 3 {
+foreach subsample in 0 {
 
 	* read data
 	gen bs_sample = ""
@@ -42,7 +43,7 @@ foreach subsample in 0 3 {
 
 	keep yvar-r2 clusterid prediction_error cumul_kwh any_post_treat month block month_of_sample numobs
 
-	foreach spec in c f i m h j {
+	foreach spec in f i m h j {
 		
 		* same seed for all specs and samples
 		set seed 137629
@@ -90,8 +91,12 @@ foreach subsample in 0 3 {
 		  bsample `numschools', cluster(clusterid)
 		  
 		  * Davis denominator
-		  qui reghdfe cumul_kwh any_post_treat `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-		  gen davis = -_b[any_post_treat]/(24*365)
+		  replace cumul_kwh = - cumul_kwh / (24*365)
+		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
+		  
+		  qui reghdfe cumul_kwh_binary any_post_treat `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+		  gen davis = _b[any_post_treat]
 		  
 		  qui summ davis
 		  local davis = r(mean)

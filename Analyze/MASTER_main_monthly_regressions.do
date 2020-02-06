@@ -4,6 +4,7 @@
 
 
 ** set up variables for regression outputs
+clear
 gen yvar = ""
 gen ylab = ""
 gen xvar = ""
@@ -26,8 +27,8 @@ local row = 1
 foreach depvar in 0 1 2 3 4 7 8 9 10 {
 foreach subsample in 0 3 6 12 13 {
 foreach postctrls in "" "post" {
-  foreach blocks in any_post_treat upgr_counter_all {
-   foreach spec in c f i m h j {
+  foreach blocks in any_post_treat upgr_counter_all cumul_kwh_binary cumul_kwh {
+   foreach spec in f i m h j {
 	 {
 
 	 local ctrls = ""
@@ -68,17 +69,16 @@ foreach postctrls in "" "post" {
 		 
 		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
 		  
-		  if ("`depvar'"=="9") {
-			replace any_post_treat = prediction_error_treat9
-		  }
-
-		  keep if prediction_error != . & cumul_kwh != .
-		  
 		  * Davis estimator
-		  qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-		  gen davis = -_b[`blocks']/(24*365)
-		  qui summ davis
-		  local davis = r(mean)
+		  replace cumul_kwh = - cumul_kwh / (24*365)
+		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
+		  
+		  local davis = .
+		  if (!strmatch("`blocks'","*kwh*")) {
+			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
 		  
 		  * Regressions
 		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
