@@ -785,7 +785,6 @@ file close myfile
 }
 
 ** Table B.11: Panel fixed effects results (continuous treatment variable)
-// add temperature?
 {
 use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
