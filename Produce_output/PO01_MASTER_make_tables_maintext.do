@@ -253,7 +253,7 @@ use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
 keep if spec==7
 append using "$dirpath_data_int/RESULTS_monthly.dta"
-keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0"
+keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0" & postctrls == ""
 local nspec 6
 replace spec = spec-1
 gen estimator = "davis"
@@ -266,12 +266,14 @@ keep if spec==7
 keep if xvar == "reguant binary"
 replace xvar = "savings binary" if xvar == "reguant binary"
 append using "$dirpath_data_int/RESULTS_monthly_savings.dta"
-keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0"
+keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0" & postctrls == ""
 local nspec 6
 replace spec = spec-1
 gen estimator = "reguant"
 
 append using "`davis'"
+
+drop if spec == 0
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_regressions_binary_davis_reguant_monthlyt.tex", write replace
@@ -382,7 +384,7 @@ keep if spec==7
 append using "$dirpath_data_int/RESULTS_monthly.dta"
 keep if xvar =="davis binary" & yvar == "qkw_hour" 
 
-keep if subsample == "3" | subsample == "6" | subsample == "12"
+keep if (subsample == "3" | subsample == "6" | subsample == "12") & postctrls == ""
 
 local nspec 6
 replace spec = spec - 1
@@ -482,14 +484,22 @@ file close myfile
 
 ** Table 4: Machine learning results
 {
+use "$dirpath_data_int/RESULTS_monthly.dta", clear
+keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0" & postctrls == "post"
+replace spec = spec-1
+gen estimator = "davis"
+tempfile davis
+save "`davis'"
 
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
-keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
-local nspec 5
+keep if xvar =="savings binary" & yvar == "prediction_error4" & subsample== "0" & postctrls == "post"
 replace spec = spec-1
+gen estimator = "reguant"
+local nspec 5
+append using "`davis'"
 
 capture file close myfile
-file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_davis.tex", write replace
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_davis_reguant.tex", write replace
 if "`standalone'" == "_standalone" {
  file write myfile "\documentclass[12pt]{article}" _n
  file write myfile "\usepackage{amsmath}" _n
@@ -499,67 +509,85 @@ if "`standalone'" == "_standalone" {
  file write myfile "\pagenumbering{gobble}" _n
  file write myfile "\small"
 }	
-file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " 
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
 forvalues i = 1(1)`nspec' {
 	file write myfile " c "
 }
-file write myfile "}" _n ///
-"\toprule " _n
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
 forvalues i = 1(1)`nspec' {
 	file write myfile " & (`i') "
-}
+} 
+
 file write myfile " \\ \midrule " _n
-file write myfile "Treat $\times$ post" 
-forvalues i = 1(1)`nspec' {
-	summ beta_aggregate if spec == `i'
+
+local s = 0
+
+foreach estimator in "davis" "reguant"  {
+if "`estimator'" == "davis" {
+  local panel = "\emph{Panel A: Average program estimates}"
+  local vtitle1 = "Realization rate"
+  local vtitle2 = "Point estimate"
+}
+else if "`estimator'" == "reguant" {
+  local panel = "\emph{Panel B: Average school-specific estimates}"
+  local vtitle1 = ""
+  local vtitle2 = "Realization rate"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+
+file write myfile "\\" _n
+if "`vtitle1'" == "Realization rate" {
+     file write myfile "\quad `vtitle1'"
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & subsample == "`s'" & estimator == "`estimator'"
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		local savings = r(mean)
+		if "`estimator'" == "reguant'" {
+		local savings = 1 
+		}
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (`r(N)' != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+}
+    file write myfile "\quad `vtitle2'"
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
 		local mean = string(r(mean),"%6.2f")
-	if (r(N) != 0) {
+	if (`r(N)' != 0)  {
 		file write myfile " & `mean' "
 	}
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'
+			summ se_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
 				local mean = string(r(mean),"%6.2f")
-			if (r(N) != 0) {
+			if (`r(N)' != 0) {
 				file write myfile " & (`mean') "
 			}
 		}
 file write myfile "\\ "_n
 	file write myfile "\quad Observations" 
 	forvalues i = 1(1)`nspec' {
-		summ nobs if spec == `i'
-		if (r(N) != 0) {
+		summ nobs if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		if (`r(N)' != 0) {
 			file write myfile " & " %10.0fc (r(mean)) " "
 		}
 	}
 	file write myfile "\\ " _n		
-	file write myfile "\midrule " _n 
 	
-	file write myfile "Realization rate " 
-	forvalues i = 1(1)`nspec' {
-		summ beta_aggregate if spec == `i'
-		local beta = r(mean)
-		summ davis_denominator if spec == `i'
-		local savings = r(mean)
-		local rate = string(`beta'/`savings',"%6.2f")
-		if (r(N) != 0) {
-			file write myfile " & `rate' "
-		}
-	}
-	file write myfile "\\ " _n	
-	forvalues i = 1(1)`nspec' {
-		summ se_aggregate if spec == `i'
-		local se_beta = r(mean)
-		summ davis_denominator if spec == `i'
-		local savings = r(mean)
-		local se_rate = string(-`se_beta'/`savings',"%6.2f")
-		if (r(N) != 0) {
-			file write myfile " & (`se_rate') "
-		}
-	}
-	file write myfile "\\ " _n		
+
 	file write myfile "\midrule " _n 
+}
 
 file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
 file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
@@ -574,7 +602,7 @@ file close myfile
 {
 
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
-keep if xvar =="davis binary" & yvar == "prediction_error4" 
+keep if xvar =="davis binary" & yvar == "prediction_error4" & postctrls == "post"
 
 keep if subsample == "3" | subsample == "6" | subsample == "12"
 
