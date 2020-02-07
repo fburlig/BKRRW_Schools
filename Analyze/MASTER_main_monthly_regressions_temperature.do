@@ -15,7 +15,6 @@ gen spec = .
 gen beta_aggregate = .
 gen se_aggregate = .
 gen davis_denominator = .
-gen davis_denominator2 = .
 gen se_mos = .
 gen nobs = .
 gen nschools = .
@@ -40,33 +39,33 @@ foreach postctrls in ""  {
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
-       local fes = "cds_code#prediction block#prediction"
+       local fes = "cds_code block"
 	   replace spec = 1 in `row'
       }
       else if "`spec'" == "f" {
-       local fes = "cds_code#block#prediction"
+       local fes = "cds_code#block"
 	   replace spec = 2 in `row'
       }
       else if "`spec'" == "h" {
-       local fes = "cds_code#block#prediction month_of_sample#prediction"
+       local fes = "cds_code#block month_of_sample"
 	   replace spec = 5 in `row'   
       }
       else if "`spec'" == "i" {
-       local fes = "cds_code#block#month#prediction"
+       local fes = "cds_code#block#month"
 	   replace spec = 3 in `row'
       }
 	  else if "`spec'" == "j" {
-       local fes = "cds_code#block#month#prediction month_of_sample#prediction"
+       local fes = "cds_code#block#month month_of_sample"
 	   replace spec = 6 in `row'
       } 
       else if "`spec'" == "m" {
-	   local ctrls = "c.month_of_sample#prediction"
-	   local fes = "cds_code#block#month#prediction"
+	   local ctrls = "c.month_of_sample"
+	   local fes = "cds_code#block#month"
 	   replace spec = 4 in `row'
 	  }
 	  local ifs = ""
 	  if "`postctrls'" == "post" {
-	   local ctrls = "`ctrls' c.posttrain#prediction"
+	   local ctrls = "`ctrls' c.posttrain"
 	  } 
 	 
 	 	 local fes = "`fes' cds_code##c.daily_t_max cds_code##c.daily_t_min cds_code##c.daily_t_mean "
@@ -87,7 +86,6 @@ foreach postctrls in ""  {
 		  if ("`depvar'"=="9") {
 			replace any_post_treat = prediction_error_treat9
 		  }
-		  gen prediction = 1
 		  // this is a m:1 merge because we collapse by posttrain
 		  merge m:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
 
@@ -137,7 +135,6 @@ foreach postctrls in ""  {
 		  replace nobs = e(N) in `row'
 		  replace nschools = e(N_clust) in `row'
 		  replace davis_denominator = `davis' in `row'
-		  replace davis_denominator2 = `davis2' in `row'
 
 		  replace r2 = e(r2) in `row'
 			
