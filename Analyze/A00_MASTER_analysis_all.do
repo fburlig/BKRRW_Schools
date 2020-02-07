@@ -26,7 +26,6 @@ do "$dirpath_code_analysis/MASTER_monthly_regressions_savings_donuts.do"
 do "$dirpath_code_analysis/MASTER_main_hourly_regressions_noT_saving_jaere.do"
 do "$dirpath_code_analysis/MASTER_main_hourly_regressions_temperature_saving_jaere.do"
 do "$dirpath_code_analysis/MASTER_main_monthly_regressions_collapses.do"
-do "$dirpath_code_analysis/MASTER_main_monthly_regressions_doublelasso.do"
 
 ** Table 1: Average characteristics of schools in the sample
 {

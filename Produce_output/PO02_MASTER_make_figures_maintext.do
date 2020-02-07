@@ -468,10 +468,12 @@ graph export "$dirpath_results_final/fig_ml_diagnostics_d.pdf", replace
 {
 use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace yvar = "qkw_temp" if yvar=="qkw_hour"
+gen rate = beta_aggregate / davis_denominator
 append using "$dirpath_data_int/RESULTS_monthly.dta"
 keep if yvar == "qkw_hour" | yvar == "prediction_error4" | yvar == "qkw_temp"
+drop if yvar == "prediction_error4" & postctrls == ""
+drop if yvar != "prediction_error4" & postctrls == "post"
 keep if strpos(xvar, "davis binary")
-gen rate = beta_aggregate / davis_denominator
 }
 
 drop if spec==1
