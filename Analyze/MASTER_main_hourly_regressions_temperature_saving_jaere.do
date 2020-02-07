@@ -15,43 +15,10 @@ merge m:1 cds_code using "$dirpath_data_temp/mean_energy_use.dta", keep(3) nogen
 bys cds_code: gen obs = _n
 
 
-gen sample6 = 1
-summ tot_kwh if obs == 1 & tot_kwh !=0, det
-replace sample6 = 0 if tot_kwh < `r(p1)' & tot_kwh != 0
-replace sample6 = 0 if tot_kwh > `r(p99)' & tot_kwh != 0
-
-/*
-gen sample7 = 1
-replace sample7 = 0 if tot_kwh < `r(p5)' & tot_kwh != 0
-replace sample7 = 0 if tot_kwh > `r(p95)' & tot_kwh != 0
-
-cap drop sample10
-gen sample10 = 1
-summ mean_energy_use if obs == 1 & mean_energy_use !=0, det
-replace sample10 = 0 if mean_energy_use < `r(p5)' & mean_energy_use != .
-replace sample10 = 0 if mean_energy_use > `r(p95)' & mean_energy_use != .
-*/
-
 gen evertreated = 0
 replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
 sort evertreated cds_code date block
 	
-	
-forvalues pred = 0(1)0 {
-	
-	gen sample3 = 0
-	by evertreated: egen p1_error = pctile(prediction_error`pred'), p(1)
-	by evertreated: egen p99_error = pctile(prediction_error`pred'), p(99)
-	replace sample3 = 1 if prediction_error`pred' > p1_error & prediction_error`pred' < p99_error
-	drop p1_error p99_error
-
-	gen sample13 = 0
-	by evertreated: egen p2_error = pctile(prediction_error`pred'), p(2)
-	by evertreated: egen p98_error = pctile(prediction_error`pred'), p(98)
-	replace sample13 = 1 if prediction_error`pred' > p2_error & prediction_error`pred' < p98_error
-	drop p2_error p98_error
-}
-	gen sample12 = sample3 * sample6
 		  
 keep block prediction_error0  cds_code month month_of_sample  temp_f any_post_treat cumul_kwh sample*
 		  
@@ -73,9 +40,7 @@ gen postctrls = ""
 gen spec = .
 gen beta_aggregate = .
 gen se_aggregate = .
-gen se_mos = .
 gen davis_denominator = .
-gen davis_denominator2 = .
 gen nobs = .
 gen nschools = .
 gen time = .
@@ -83,22 +48,18 @@ gen r2 = .
 set obs 2000
 
 local row = 1
-*foreach depvar in 0 1 2 3 4 5 6 7 8 9 10 {
 foreach depvar in 0 {
-*foreach subsample in 0 {
 foreach subsample in 0 3 6 12 13 {
 foreach postctrls in "" {
-*foreach postctrls in  "" "post" {
   foreach blocks in any_post_treat cumul_kwh_binary {
- * foreach blocks in  cumul_kwh_binary {
-   foreach spec in c f i m h j {
+   foreach spec in f i m h j {
 	 {
-	 /*if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
+	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
 		continue
 	 }
 	 else if (`depvar'!=0 & `depvar'!=9) & ("`postctrls'"=="") {
 		continue
-	 }*/
+	 }
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
@@ -151,44 +112,23 @@ foreach postctrls in "" {
 			replace any_post_treat = prediction_error_treat9
 		  }
 
-		  * Davis denominator
-		  if ("`blocks'"=="any_post_treat") {
-			qui reghdfe cumul_kwh `blocks' `ctrls' `ifs', absorb(`fes') tol(0.001)
-			gen davis = -_b[`blocks']/(24*365)
-			egen davis2 = mean(cumul_kwh) if cumul_kwh > 0 
-			replace davis2 = -davis2/(24*365)
-		  qui summ davis
-		  local davis = r(mean)
-		  qui summ davis2
-		  local davis2 = r(mean)		  
-		  }
+		  * Davis estimator
+		  replace cumul_kwh = - cumul_kwh / (24*365)
+		  by cds_code: egen cumul_kwh_binary = mean(cumul_kwh) if cumul_kwh < 0
+		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
-		  else if ("`blocks'"=="cumul_kwh_binary") {
-		   * create additional savings variables
-		   sort cds_code
-		   
-		   by cds_code: gen numobs = _N
-		   sort prediction cds_code
-
-		   by prediction cds_code: egen avg_savings_prelim = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-		   egen cumul_kwh_binary = mean(avg_savings_prelim), by(prediction cds_code)
-		   replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
-		   replace cumul_kwh_binary = cumul_kwh_binary*any_post_treat
-		   drop avg_savings_prelim
-		   replace cumul_kwh = -cumul_kwh/(24*365)
-		   replace cumul_kwh_binary = -cumul_kwh_binary/(24*365) 
+		  local davis = .
+		  if (strmatch("`blocks'","any_post_treat")) {
+			qui reghdfe cumul_kwh_binary `blocks' `ctrls' , absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
+		  if (strmatch("`blocks'","upgr_counter_all")) {
+			qui reghdfe cumul_kwh `blocks' `ctrls' , absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
 		  }
 
 		  
-		  * Main regressions
-		  /*
-		  qui reghdfe prediction_error `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
-		  local se_mos = _se[`blocks']
-		  */
-		  timer clear 1
-		  timer on 1
 		  qui reghdfe prediction_error `blocks' `ctrls' `ifs', absorb(`fes') tol(0.001) cluster(`clstrs')
-		  timer off 1
 		  restore 
 		  
 		  if (`depvar'==0) {
@@ -255,7 +195,6 @@ foreach postctrls in "" {
 		  replace nschools = e(N_clust) in `row'
 		  replace r2 = e(r2) in `row'
 		  replace davis_denominator = `davis' in `row'
-		  replace davis_denominator2 = `davis2' in `row'
 		  replace time = `time' in `row'
 		  local row = `row' + 1
 	  
