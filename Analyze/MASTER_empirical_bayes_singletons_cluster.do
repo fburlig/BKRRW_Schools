@@ -2,8 +2,7 @@
 **** ANALYSIS: EMPIRICAL BAYES
 ************************************************
 
-use "$dirpath_data_temp/monthly_by_block4_sample0.dta", clear
-append using "$dirpath_data_temp/monthly_by_block10_sample0.dta"
+use "$dirpath_data_temp/monthly_by_block10_sample0.dta", clear
 merge m:1 cds_code using "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", keep(3) nogenerate
 
 sum school_id, det
@@ -35,7 +34,7 @@ set obs 2500
 
 local row = 1
 forvalues i = 1/`schoolmax' {
-foreach depvar in 11 {
+foreach depvar in 10 {
 foreach subsample in 0 {
 foreach postctrls in "" {
   foreach blocks in posttrain {
@@ -44,33 +43,33 @@ foreach postctrls in "" {
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
-       local fes = "cds_code#prediction block#prediction"
+       local fes = "cds_code block"
 	   replace spec = 1 in `row'
       }
       else if "`spec'" == "f" {
-       local fes = "cds_code#block#prediction"
+       local fes = "cds_code#block"
 	   replace spec = 2 in `row'
       }
       else if "`spec'" == "h" {
-       local fes = "cds_code#block#prediction month_of_sample#prediction"
+       local fes = "cds_code#block month_of_sample"
 	   replace spec = 5 in `row'   
       }
       else if "`spec'" == "i" {
-       local fes = "cds_code#block#month#prediction"
+       local fes = "cds_code#block#month"
 	   replace spec = 3 in `row'
       }
 	  else if "`spec'" == "j" {
-       local fes = "cds_code#block#month#prediction month_of_sample#prediction"
+       local fes = "cds_code#block#month month_of_sample"
 	   replace spec = 6 in `row'
       } 
       else if "`spec'" == "m" {
-	   local ctrls = "c.month_of_sample#prediction"
-	   local fes = "cds_code#block#month#prediction"
+	   local ctrls = "c.month_of_sample"
+	   local fes = "cds_code#block#month"
 	   replace spec = 4 in `row'
 	  }
 	  local ifs = ""
 	  if "`postctrls'" == "post" {
-	   local ctrls = "`ctrls' c.posttrain#prediction"
+	   local ctrls = "`ctrls' c.posttrain"
 	  } 
 	 }
 
@@ -82,11 +81,10 @@ foreach postctrls in "" {
 	  local beta_slope = 99999999
 	  local se_slope = 99999999
 	  
-	  use "$dirpath_data_temp/monthly_by_block4_sample`subsample'.dta", clear
-      append using "$dirpath_data_temp/monthly_by_block10_sample`subsample'.dta"
-      merge m:1 cds_code using "$dirpath_data_int\School specific\schoolid_cdscode_map.dta", keep(3) nogenerate
+	  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
+      merge m:1 cds_code using "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", keep(3) nogenerate
 	  
-      keep cds_code school_id cumul_kwh prediction_error prediction block month_of_sample month posttrain
+      keep cds_code school_id cumul_kwh prediction_error block month_of_sample month posttrain
 
       keep if school_id == `i'
 	  
@@ -120,7 +118,7 @@ foreach postctrls in "" {
 }
 drop if school_id == .
 drop cds_code
-merge 1:1 school_id using "$dirpath_data_int\School specific\schoolid_cdscode_map.dta", nogen
+merge 1:1 school_id using "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", nogen
 
 save "$dirpath_data_int/school_specific_slopes_robust.dta", replace
 
