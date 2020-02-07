@@ -7,18 +7,7 @@
 use "$dirpath_data_int/RESULTS_ml_estimators_levels_samples.dta", clear
 
 keep if subsample=="0"
-
-gen prediction_error = .
-replace prediction_error = 1 if _n < 7
-replace prediction_error = 2 if _n > 6 & _n < 13
-replace prediction_error = 3 if _n > 12 & _n < 19
-replace prediction_error = 4 if _n > 18 & _n < 25
-replace prediction_error = 5 if _n > 24 & _n < 31
-replace prediction_error = 6 if _n > 30 & _n < 37
-replace prediction_error = 7 if _n > 36 & _n < 43
-replace prediction_error = 8 if _n > 42 
-
-keep if prediction_error == 4
+keep if yvar == "prediction_error4"
 
 gen spec = .
 replace spec = 1 if spec_desc == "bc"
@@ -28,9 +17,6 @@ replace spec = 4 if spec_desc == "bcd"
 replace spec = 5 if spec_desc == "btd"
 replace spec = 6 if spec_desc == "b3d"
 
-local nspec = 5
-
-keep if subsample == "0"
 keep spec *_aggregate
 drop if spec == .
 drop if beta_aggregate == .
@@ -51,8 +37,6 @@ replace order = 6 if spec == 6
 
 label define orderlab 1 "U" 2 "UD" 3 "T" 4 "TD"  5 "PD" 6 "DD" 
 label values order orderlab   
-
-
 
 twoway (rspike ci95_lo_aggregate ci95_hi_aggregate order, lcolor(gs10) lwidth(thin)) ///
        (scatter beta_aggregate order, mlcolor(midblue) mfcolor(white) msize(medium)) ///

@@ -61,7 +61,7 @@ replace sample3 = 1 if `depvar' > p1_error & `depvar' < p99_error
 drop p1_error p99_error
 
 foreach i in 0 3 {
-	
+
 		replace yvar = "`depvar'" in `row'
 		
 		* prediction error control
@@ -134,8 +134,11 @@ foreach i in 0 3 {
 
 keep if spec_desc != ""
 
+gen ci95_lo_aggregate = beta_aggregate - 1.96*se_aggregate
+gen ci95_hi_aggregate = beta_aggregate + 1.96*se_aggregate
 
-keep beta* se* spec_desc nobs subsample
+carryforward yvar, replace
+keep yvar beta* se* ci95* spec_desc nobs subsample
 
 save "$dirpath_data_int/RESULTS_ml_estimators_levels_samples.dta", replace
 
