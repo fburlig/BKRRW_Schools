@@ -104,6 +104,12 @@ foreach postctrls in "" "post" {
 		  else if ("`blocks'"=="upgr_counter_all") {
 			replace xvar = "davis continuous (counter)" in `row'
 		  }
+		  else if ("`blocks'"=="cumul_kwh_binary") {
+			replace xvar = "savings binary" in `row'
+		  }
+		  else if ("`blocks'"=="cumul_kwh") {
+			replace xvar = "savings continuous" in `row'
+		  }
 		  
 		  if "`depvar'" == "0" {
 			replace ylab = "Electricity consumption (kWh)" in `row'
