@@ -88,37 +88,24 @@ foreach postctrls in ""  {
 			replace any_post_treat = prediction_error_treat9
 		  }
 		  gen prediction = 1
+		  // this is a m:1 merge because we collapse by posttrain
 		  merge m:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
-		  
-		  		  * Davis denominator
-		  if ("`blocks'"=="any_post_treat") {
-			qui reghdfe cumul_kwh `blocks' `ctrls' `ifs', absorb(`fes') tol(0.001)
-			gen davis = -_b[`blocks']/(24*365)
-			egen davis2 = mean(cumul_kwh) if cumul_kwh > 0 
-			replace davis2 = -davis2/(24*365)
-		  qui summ davis
-		  local davis = r(mean)
-		  qui summ davis2
-		  local davis2 = r(mean)		  
-		  }
-		  
-		  else if ("`blocks'"=="cumul_kwh_binary") {
-		   * create additional savings variables
-		   sort cds_code
-		   
-		   /*
-		   cap drop numobs
-		   by cds_code: gen numobs = _N
-		   */
-		   sort prediction cds_code
 
-		   by prediction cds_code: egen avg_savings_prelim = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-		   egen cumul_kwh_binary = mean(avg_savings_prelim), by(prediction cds_code)
-		   replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
-		   replace cumul_kwh_binary = cumul_kwh_binary*any_post_treat
-		   drop avg_savings_prelim
-		   replace cumul_kwh = -cumul_kwh/(24*365)
-		   replace cumul_kwh_binary = -cumul_kwh_binary/(24*365) 
+		  
+		  
+		  * Davis estimator
+		  replace cumul_kwh = - cumul_kwh / (24*365)
+		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
+		  
+		  local davis = .
+		  if (strmatch("`blocks'","any_post_treat")) {
+			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
+		  if (strmatch("`blocks'","upgr_counter_all")) {
+			qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
 		  }
 		  
 		  * Regressions
@@ -126,22 +113,6 @@ foreach postctrls in ""  {
 		  local se_mos = _se[`blocks']
 		  
 		  qui reghdfe qkw_hour `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
-		  
-		  /* old code
-		  if ("`blocks'"=="any_post_treat") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-		  }
-		  else if ("`blocks'"=="upgr_counter_all") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			egen count_temp  = wtmean(upgr_counter_all) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = davis/count_temp
-			replace davis2 = -davis/(24*365)
-			drop count_temp
-		  }
-		  */
 		  
 		  restore 
 		  
