@@ -92,7 +92,7 @@ foreach postctrls in ""  {
 		  merge m:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
 
 		  
-		  
+		  sort cds_code
 		  * Davis estimator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
 		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
