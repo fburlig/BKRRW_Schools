@@ -5,8 +5,7 @@
 
 {
 * create numobs and davis savings
-use "$dirpath_data_temp/monthly_by_block4_sample0.dta", clear
-append using "$dirpath_data_temp/monthly_by_block10_sample0.dta"
+use "$dirpath_data_temp/monthly_by_block10_sample0.dta", clear
 sort cds_code month_of_sample block
 by cds_code: egen davis_by_school = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
 collapse (mean) davis_by_school (sum) numobs, by(cds_code)
@@ -74,13 +73,13 @@ local spec = 3
 local s = 0
 local beta_pick = "ebayes_rel2"
 
-qreg `beta_pick' [aw=numobs]
+qreg `beta_pick' 
 replace b_cons = _b[_cons] in 1
 replace se_cons = _se[_cons] in 1
 replace nobs = `e(N)' in 1
 replace spec = 1 in 1
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light 
 replace b_cons = _b[_cons] in 2
 replace se_cons = _se[_cons] in 2
 replace b_hvac_dummy = _b[hvac_dummy] in 2
@@ -92,7 +91,7 @@ replace se_hvac_light = _se[hvac_light] in 2
 replace nobs = `e(N)' in 2
 replace spec = 2 in 2
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat coastal temp_f [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat coastal temp_f
 replace b_cons = _b[_cons] in 3
 replace se_cons = _se[_cons] in 3
 replace b_hvac_dummy = _b[hvac_dummy] in 3
@@ -112,7 +111,7 @@ replace se_coastal = _se[coastal] in 3
 replace nobs = `e(N)' in 3
 replace spec = 3 in 3
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat coastal temp_f  enr_total [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat coastal temp_f  enr_total 
 replace b_cons = _b[_cons] in 4
 replace se_cons = _se[_cons] in 4
 replace b_hvac_dummy = _b[hvac_dummy] in 4
@@ -134,7 +133,7 @@ replace se_coastal = _se[coastal] in 4
 replace nobs = `e(N)' in 4
 replace spec = 4 in 4
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f coastal enr_total API_BASE poverty_rate  [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f coastal enr_total API_BASE poverty_rate  
 replace b_cons = _b[_cons] in 5
 replace se_cons = _se[_cons] in 5
 replace b_hvac_dummy = _b[hvac_dummy] in 5
@@ -160,7 +159,7 @@ replace se_coastal = _se[coastal] in 5
 replace nobs = `e(N)' in 5
 replace spec = 5 in 5
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f  enr_total API_BASE poverty_rate tot_kwh coastal [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f  enr_total API_BASE poverty_rate tot_kwh coastal 
 replace b_cons = _b[_cons] in 6
 replace se_cons = _se[_cons] in 6
 replace b_hvac_dummy = _b[hvac_dummy] in 6
@@ -192,7 +191,7 @@ replace spec = 6 in 6
 
 gen hvac_coastal = hvac_dummy * coastal
 
-qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f  enr_total API_BASE poverty_rate tot_kwh coastal hvac_coastal [aw=numobs]
+qreg `beta_pick' hvac_dummy light_dummy hvac_light cde_lon cde_lat temp_f  enr_total API_BASE poverty_rate tot_kwh coastal hvac_coastal 
 replace b_cons = _b[_cons] in 7
 replace se_cons = _se[_cons] in 7
 replace b_hvac_dummy = _b[hvac_dummy] in 7
