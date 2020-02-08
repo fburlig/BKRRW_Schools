@@ -39,7 +39,6 @@ gen davis_denominator = .
 gen davis_denominator2 = .
 gen nobs = .
 gen nschools = .
-gen time = .
 gen r2 = .
 set obs 2000
 
@@ -196,7 +195,6 @@ foreach postctrls in  "" "post" {
 		  replace nschools = e(N_clust) in `row'
 		  replace r2 = e(r2) in `row'
 		  replace davis_denominator = `davis' in `row'
-		  replace time = `time' in `row'
 		  local row = `row' + 1
 	  
 	  }

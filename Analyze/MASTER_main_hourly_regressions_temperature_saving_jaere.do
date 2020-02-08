@@ -18,7 +18,30 @@ bys cds_code: gen obs = _n
 gen evertreated = 0
 replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
 sort evertreated cds_code date block
+
+
+gen sample6 = 1
+summ tot_kwh if obs == 1 & tot_kwh !=0, det
+replace sample6 = 0 if tot_kwh < `r(p1)' & tot_kwh != 0
+replace sample6 = 0 if tot_kwh > `r(p99)' & tot_kwh != 0
+
+
+gen evertreated = 0
+replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
+sort evertreated cds_code date block
 	
+	
+forvalues pred = 0(1)0 {
+	
+	gen sample3 = 0
+	by evertreated: egen p1_error = pctile(prediction_error`pred'), p(1)
+	by evertreated: egen p99_error = pctile(prediction_error`pred'), p(99)
+	replace sample3 = 1 if prediction_error`pred' > p1_error & prediction_error`pred' < p99_error
+	drop p1_error p99_error
+
+}
+	gen sample12 = sample3 * sample6
+		  	
 		  
 keep block prediction_error0  cds_code month month_of_sample  temp_f any_post_treat cumul_kwh sample*
 		  
@@ -49,7 +72,7 @@ set obs 2000
 
 local row = 1
 foreach depvar in 0 {
-foreach subsample in 0 3 6 12 13 {
+foreach subsample in 0 3 6 12 {
 foreach postctrls in "" {
   foreach blocks in any_post_treat cumul_kwh_binary {
    foreach spec in f i m h j {
@@ -114,7 +137,7 @@ foreach postctrls in "" {
 
 		  * Davis estimator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
-		  by cds_code: egen cumul_kwh_binary = mean(cumul_kwh) if cumul_kwh < 0
+		  bys cds_code: egen cumul_kwh_binary = mean(cumul_kwh) if cumul_kwh < 0
 		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
 		  local davis = .
@@ -180,10 +203,6 @@ foreach postctrls in "" {
 		  if "`depvar'" == "11" {
 			replace ylab = "Prediction error (kWh) - Pre/Post" in `row'
 		  }		  
-		  timer list 1
-		  local time = `r(t1)'
-		  di "TIME: `time'"
-		  
 		  replace fe = "`fes'" in `row'
 		  replace clustering = "`clstrs'" in `row'
 		  replace controls = "`ctrls'" in `row'
@@ -195,7 +214,6 @@ foreach postctrls in "" {
 		  replace nschools = e(N_clust) in `row'
 		  replace r2 = e(r2) in `row'
 		  replace davis_denominator = `davis' in `row'
-		  replace time = `time' in `row'
 		  local row = `row' + 1
 	  
 	  }
