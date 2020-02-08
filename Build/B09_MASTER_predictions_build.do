@@ -8,7 +8,7 @@ local schoolidmax = r(max)
 di `schoolidmax'
 
 local build_forest = 0
-local build_dl = 0
+local build_dl = 1
 local build_prediction = 0
 local build_varnames = 0
 
@@ -55,20 +55,17 @@ cap {
 	insheet using "$dirpath_data_int/School specific/double lasso/school_data_`i'_prediction_dl_block`b'.csv", clear comma
 
 	*data cleaning
+	gen school_id = `i'
+	gen block = `b'
 	rename qkw_hour qkw
-	
-	rename prediction prediction9
-	rename prediction_treat prediction_treat9
-	*rename prediction_time prediction_time9
+	rename prediction_dl4 prediction9
 
 	local m = 9
 	replace prediction`m' = 0 if prediction`m' < 0
 	replace prediction`m' = 1500 if prediction`m' > 1500
 	gen prediction_error`m' = qkw - prediction`m'
-	gen prediction_error_treat`m' = any_post_treat - prediction_treat`m'
-	*gen prediction_error_time`m' = date_numeric - prediction_time`m'
 	
-	keep date block school_id prediction_error*9 
+	keep date block school_id prediction_error9 
 	
 	compress
 	save "$dirpath_data_int/School specific/double lasso/school_data_`i'_prediction_dl`b'.dta", replace	

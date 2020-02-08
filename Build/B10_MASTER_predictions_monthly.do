@@ -30,7 +30,7 @@ drop date
 rename date_s date
 
 * reshape long
-keep prediction_error? prediction_error_treat? prediction_error_bs* date block school_id posttrain
+keep prediction_error? prediction_error_bs* date block school_id posttrain
 
 gen prediction_error10 = (prediction_error1 + prediction_error2+prediction_error3+prediction_error4+prediction_error7+prediction_error8+prediction_error9)/7
 
@@ -122,7 +122,7 @@ foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 		keep if sample`subsample'==1
 		
 		gen byte numobs = 1
-		gcollapse (mean) prediction_error*`pred' qkw* tot* cumul* upgr* ///
+		gcollapse (mean) prediction_error`pred' qkw* tot* cumul* upgr* ///
 			(sum) numobs, by(cds_code block month year month_of_sample any_post_treat posttrain)
 		rename prediction_error`pred' prediction_error
 		

@@ -16,7 +16,7 @@ setwd("T:/Projects/Schools/Data")
 set.seed(12345)
 
 #### SET UP PARALLEL STUFF
-myCores <- 4
+myCores <- 6
 cl <- makeCluster(myCores)
 clusterEvalQ(cl, library(stats))
 clusterEvalQ(cl, library("crayon", lib="T:/Projects/Schools/RLibraries"))
@@ -154,35 +154,17 @@ estimateModel <- function(i) {
     dataset <- merge(dataset,week_rnd,by="weekid")
     
     Y = dataset$qkw_hour
-    dataset$date_numeric <- as.numeric(dataset$date)
     
-    # predictions
-    Treat = dataset$any_post_treat
     prediction.model = cv.glmnet(Xall,Y,foldid=dataset$foldid,family="gaussian",alpha=1)
-    varnames <- as.data.frame(coef(prediction.model, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model, s = "lambda.1se")@i+1])
-    colnames(varnames) <- "varname"
-    if (mean(Treat) != 0) {
-      prediction.model_treat = cv.glmnet(Xall,Treat,foldid=dataset$foldid,family="gaussian",alpha=1)
-      varnames2 <- as.data.frame(coef(prediction.model_treat, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model_treat, s = "lambda.1se")@i+1])
-      colnames(varnames2) <- "varname"
-      varnames <- rbind(varnames,varnames2)
-    }
-    varnames <- unique(varnames)
-    names <- as.vector(varnames[,1])
+    dataset$prediction_dl1 <- c(predict(prediction.model,Xall,type="link", s = "lambda.min"))
+    dataset$prediction_dl2 <- c(predict(prediction.model,Xall,type="link", s = "lambda.1se"))
     
-    Xsmall <- as.matrix(Xall[,names])
-    prediction.model <- lm(Y ~ Xsmall)
-    dataset$prediction <- c(predict(prediction.model))
-  
-    dataset$prediction_treat <- Treat
-    if (mean(Treat) != 0) {
-      prediction.model_treat <- lm(Treat ~ Xsmall)
-      dataset$prediction_treat <- c(predict(prediction.model_treat))
-    }
+    prediction.modelc = cv.glmnet(Xallcontrols,Y,foldid=dataset$foldid,family="gaussian",alpha=1)
+    dataset$prediction_dl3 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.min"))
+    dataset$prediction_dl4 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.1se"))
     
     #reduce size
-    dataset <- dataset[,c("date","date_numeric","month","year","month_of_sample","school_id","block",
-                          "qkw_hour","any_post_treat", "prediction", "prediction_treat")]
+    dataset <- dataset[,c("date", "qkw_hour", "prediction_dl1",  "prediction_dl2",  "prediction_dl3", "prediction_dl4")]
     
     write.csv(dataset,file=paste0("Intermediate/School specific/double lasso/school_data_",i,"_prediction_dl_block",b,".csv"))
     
