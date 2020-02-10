@@ -15,21 +15,15 @@ merge m:1 cds_code using "$dirpath_data_temp/mean_energy_use.dta", keep(3) nogen
 bys cds_code: gen obs = _n
 
 
-gen evertreated = 0
-replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
-sort evertreated cds_code date block
-
-
 gen sample6 = 1
 summ tot_kwh if obs == 1 & tot_kwh !=0, det
 replace sample6 = 0 if tot_kwh < `r(p1)' & tot_kwh != 0
 replace sample6 = 0 if tot_kwh > `r(p99)' & tot_kwh != 0
 
-
 gen evertreated = 0
 replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
 sort evertreated cds_code date block
-	
+
 	
 forvalues pred = 0(1)0 {
 	
@@ -235,5 +229,4 @@ gen ci95_hi_aggregate = beta_aggregate + 1.96*se_aggregate
 save "$dirpath_data_int/RESULTS_hourly_withtemp_wsavings.dta", replace
 
 gen rate = beta_aggregate / davis_denominator
-gen rate2 = beta_aggregate / davis_denominator2
 br yvar fe controls beta_aggregate rate*

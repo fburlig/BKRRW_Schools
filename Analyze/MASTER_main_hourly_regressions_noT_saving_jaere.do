@@ -4,7 +4,7 @@
 
 use "$dirpath_data_temp/newpred_formerge_by_block.dta", clear
 merge m:1 cds_code date block using "$dirpath_data_int/full_analysis_data_trimmed.dta", keep(3) nogen
-keep block prediction_error0 prediction_error4 date cds_code month month_of_sample  temp_f any_post_treat cumul_kwh
+keep block prediction_error0 prediction_error4 posttrain date cds_code month month_of_sample  temp_f any_post_treat cumul_kwh
 	  
 		  
 ** CREATE SUBSAMPLE VARIABLES
@@ -14,7 +14,7 @@ merge m:1 cds_code using "$dirpath_data_int/ee_total_formerge.dta", keep(3) noge
 merge m:1 cds_code using "$dirpath_data_temp/mean_energy_use.dta", keep(3) nogen
 bys cds_code: gen obs = _n
 
-keep block prediction_error0 prediction_error4 cds_code month month_of_sample  temp_f any_post_treat cumul_kwh sample*
+keep block prediction_error0 prediction_error4 posttrain cds_code month month_of_sample  temp_f any_post_treat cumul_kwh sample*
 		  
 tempfile analysisdata
 save "`analysisdata'"		  
@@ -34,9 +34,7 @@ gen postctrls = ""
 gen spec = .
 gen beta_aggregate = .
 gen se_aggregate = .
-gen se_mos = .
 gen davis_denominator = .
-gen davis_denominator2 = .
 gen nobs = .
 gen nschools = .
 gen r2 = .
@@ -216,5 +214,4 @@ gen ci95_hi_aggregate = beta_aggregate + 1.96*se_aggregate
 save "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta", replace
 
 gen rate = beta_aggregate / davis_denominator
-gen rate2 = beta_aggregate / davis_denominator2
 br yvar fe controls beta_aggregate rate*
