@@ -6,14 +6,92 @@
 {
 *THIS FIGURE IS BUILT IN R: "$dirpath_code_produceoutput/jan4_map_tc.R"
 }
+** Figure 2: Energy efficiency upgrades
+{
+use "$dirpath_data_int/ee_clean_elec_noclusters.dta", clear
 
-** Figure 2: School characteristics before and after treatment
+gen counter = 1
+
+collapse (sum) counter adj, by(upgrade date)
+
+gen year = year(date)
+gen month = month(date)
+gen ym = ym(year, month)
+format ym %tm
+
+
+collapse(sum) counter adj, by(ym year month upgrade)
+
+preserve
+keep counter  ym
+collapse (sum) counter, by(ym)
+
+rename counter total_count
+
+tempfile total1
+save `total1'
+
+restore
+
+merge m:1 ym using `total1', nogen
+
+preserve
+keep adj ym
+collapse (sum) adj, by(ym)
+rename adj total_kwh
+
+tempfile total2
+save `total2'
+
+restore
+merge m:1 ym using `total2', nogen 
+
+keep if year > 2007 & year < 2015
+
+
+twoway (line total_count ym if upgrade == 7, lpattern(solid) lcolor(navy)) ///
+       (line counter ym if upgrade == 7, lpattern(solid) lcolor(midblue)) ///
+       (line counter ym if upgrade == 8, lpattern(solid) lcolor(eltblue) ///
+        text(250 565 "A", color(black) size(huge))), ///
+	   ytitle("Number of upgrades") xtitle("") ///
+	   legend(order(1 "Total" 2 "HVAC" 3 "Lighting"))
+graph export "$dirpath_results_final/fig_eestats_A.pdf", replace
+	   
+	   	   
+use "$dirpath_data_int/ee_clean_elec_noclusters.dta", clear
+
+gen  year = year(date)
+keep if year > 2007 & year < 2015
+
+drop if upgrade_tech == 11
+gen counter = 1
+collapse (sum) counter adj, by(upgrade)
+
+gsort -adj
+gen back = _n
+
+format adj %30.0f
+
+gen adj2 = adj / 1000
+
+
+format adj2 %8.0fc  
+graph twoway (bar adj2 back, horizontal barwidth(0.8) fcolor(gs10) lcolor(gs10) ///
+        text(10.5 -12000 "B", color(black) size(huge))), ///
+     ylabel(1 "Lighting" 2 "HVAC" ///
+     3 "Electronics" 4 "Cross portfolio" 5 "Appliances" 6 "Refrigeration" ///
+	 7 "Food service" 8 "Boilers" 9 "Motors" 10 "     Building envelope") ///
+	 ytitle("") ylabel(,noticks) ///
+	 xtitle("Expected savings ('000 kWh)")
+graph export "$dirpath_results_final/fig_eestats_B.pdf", replace
+}
+
+** Figure 3: School characteristics before and after treatment
 {
 ** PREP DATA
 {
-foreach bp in "_BP" {
 
-use "$dirpath_data_int/RESULTS_demographic_eventstudies`bp'.dta", clear
+use "$dirpath_data_int/RESULTS_demographic_eventstudies.dta", clear
 
 local lag = 4
 local fwd = 6
@@ -58,62 +136,61 @@ sort yvar ylab fe clustering controls subsample  nobs nschools r2 esyr
 local outcome "enr_total"
 local spec 2
 
-twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(gs10) lwidth(medium)) ///
-       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
-       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr <6 & esyr > -6 , mlcolor(midblue) mfcolor(white) msize(medium) ///
+twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(gs10) lwidth(medium)) ///
+       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
+       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3 , mlcolor(midblue) mfcolor(white) msize(medium) ///
        text(4 -7.75 , color(black) size(huge))) , /// 
 	   scheme(fb) ytitle("Number of students") /// 
 	   xtitle("Years to upgrade") legend(off) yline(0, lcolor(gs12)) ///
 	   xlabel(-2 0 2 4) /* ylabel(-6(2)4) yscale(range(-6 4)) */
 
-graph export "$dirpath_results_final/fig_eventstudy_demographics_enrtotal`bp'.pdf", replace
+graph export "$dirpath_results_final/fig_eventstudy_demographics_enrtotal.pdf", replace
 
 
 local outcome "staff_count"
 local spec 2
 
-twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(gs10) lwidth(medium)) ///
-       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
-       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr <6 & esyr > -6 , mlcolor(midblue) mfcolor(white) msize(medium) ///
+twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(gs10) lwidth(medium)) ///
+       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
+       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3 , mlcolor(midblue) mfcolor(white) msize(medium) ///
        text(4 -7.75 , color(black) size(huge))) , /// 
 	   scheme(fb) ytitle("Number of staff") /// 
 	   xtitle("Years to upgrade") legend(off) yline(0, lcolor(gs12)) ///
 	   xlabel(-2 0 2 4) /* ylabel(-6(2)4) yscale(range(-6 4)) */
 
-graph export "$dirpath_results_final/fig_eventstudy_demographics_stafftotal`bp'.pdf", replace
+graph export "$dirpath_results_final/fig_eventstudy_demographics_stafftotal.pdf", replace
 
 
 local outcome "mathproficient"
 local spec 2
 
-twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(gs10) lwidth(medium)) ///
-       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
-       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr <6 & esyr > -6 , mlcolor(midblue) mfcolor(white) msize(medium) ///
+twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(gs10) lwidth(medium)) ///
+       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
+       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3 , mlcolor(midblue) mfcolor(white) msize(medium) ///
        text(4 -7.75 , color(black) size(huge))) , /// 
 	   scheme(fb) ytitle("Percent of students proficient or better (math tests)") /// 
 	   xtitle("Years to upgrade") legend(off) yline(0, lcolor(gs12)) ///
 	   xlabel(-2 0 2 4) /* ylabel(-6(2)4) yscale(range(-6 4)) */
 
-graph export "$dirpath_results_final/fig_eventstudy_demographics_mathproficient`bp'.pdf", replace
+graph export "$dirpath_results_final/fig_eventstudy_demographics_mathproficient.pdf", replace
 
 
 
 local outcome "elaproficient"
 local spec 2
 
-twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(gs10) lwidth(medium)) ///
-       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6 & esyr > -6, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
-       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 6& esyr > -6 , mlcolor(midblue) mfcolor(white) msize(medium) ///
+twoway (rspike ci95_lo ci95_hi esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(gs10) lwidth(medium)) ///
+       (line beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3, lcolor(midblue) lwidth(medium) lpattern(solid)) ///
+       (scatter beta esyr if spec == `spec' & yvar == "`outcome'" & esyr < 5 & esyr > -3 , mlcolor(midblue) mfcolor(white) msize(medium) ///
        text(4 -7.75 , color(black) size(huge))) , /// 
 	   scheme(fb) ytitle("Percent of students proficient or better (ELA tests)") /// 
 	   xtitle("Years to upgrade") legend(off) yline(0, lcolor(gs12)) ///
 	   xlabel(-2 0 2 4) /* ylabel(-6(2)4) yscale(range(-6 4)) */
 
-graph export "$dirpath_results_final/fig_eventstudy_demographics_elaproficient`bp'.pdf", replace
+graph export "$dirpath_results_final/fig_eventstudy_demographics_elaproficient.pdf", replace
 
 }
 
-}
 
 
 ** PREP DATA
@@ -190,7 +267,7 @@ graph export "$dirpath_results_final/Appendix/fig_eventstudy_allspecs_dd_levels_
 
 }
 
-** Figure 3: Machine learning approach -- graphical intuition
+** Figure 4: Machine learning approach -- graphical intuition
 {
 ** PREP DATA
 {
@@ -223,7 +300,7 @@ twoway ///
 }
 }
 
-** Figure 4: Machine learning diagnostics
+** Figure 5: Machine learning diagnostics
 {
 {
 ** PANEL A
@@ -462,7 +539,7 @@ graph export "$dirpath_results_final/fig_ml_diagnostics_d.pdf", replace
 
 }
 
-** Figure 5: Comparison of methods across specifications and samples
+** Figure 6: Comparison of methods across specifications and samples
 {
 ** PREP DATA
 {
@@ -474,9 +551,10 @@ keep if yvar == "qkw_hour" | yvar == "prediction_error4" | yvar == "qkw_temp"
 drop if yvar == "prediction_error4" & postctrls == ""
 drop if yvar != "prediction_error4" & postctrls == "post"
 keep if strpos(xvar, "davis binary")
+
+drop if spec == 1
 }
 
-drop if spec==1
 ** MAKE FIGURES
 {
 
@@ -494,7 +572,7 @@ graph export "$dirpath_results_final/fig_kdensities_rate_monthlyt.pdf", replace
 
 }
 
-** Figure 6: School-specific effects
+** Figure 7: School-specific effects
 {
 use "$dirpath_data_int/school_specific_slopes_flagged_robust.dta", clear
 
@@ -527,25 +605,25 @@ local u_thr_sav = -r(p1)
 replace savings = -savings
 replace `beta_pick' = -`beta_pick'
 
-reg `beta_pick' savings [w=numobs]
-reg `beta_pick' savings [w=numobs] if savings < `u_thr_sav'
-reg `beta_pick' savings [w=numobs] if savings < `u_thr_sav' & savings > `l_thr_sav'
-reg `beta_pick' savings [w=numobs] if `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta' & savings < `u_thr_sav' & savings > `l_thr_sav'
+reg `beta_pick' savings
+reg `beta_pick' savings if savings < `u_thr_sav'
+reg `beta_pick' savings if savings < `u_thr_sav' & savings > `l_thr_sav'
+reg `beta_pick' savings if `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta' & savings < `u_thr_sav' & savings > `l_thr_sav'
 local slope_sav = round(_b[savings],.01)
 
 
 twoway (scatter  `beta_pick' savings, mcolor(gs10))  ///
 		(pci 41 40 41 40, lcolor(gs12) lwidth(thin) ///
-		text(48 46 "Slope:", size(7)) text(38 46 "`slope_sav'", size(7)) text(75 -8.5 "A", size(vhuge))) ///	
-        (lfit `beta_pick' savings [w=numobs] , lcolor(midblue) lstyle(solid) lwidth(medthick))  ///	
+		text(48 46 "Slope:", size(7)) text(38 46 "0`slope_sav'", size(7)) text(75 -8.5 "A", size(vhuge))) ///	
+        (lfit `beta_pick' savings  , lcolor(midblue) lstyle(solid) lwidth(medthick))  ///	
 		if `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta' & savings < `u_thr_sav' & savings > `l_thr_sav', graphregion(color(white))  ///
 		legend(off) scheme(fb) xtitle("Expected savings (kWh)", size(7)) ytitle("Estimated savings (kWh)", size(7)) ///
 		yscale(range(-75 75) noextend) xscale(noextend) ylab(-75 -50 -25 0 25 50 75, labsize(7)) xlab(, labsize(7)) yline(0, lcolor(gs7) lwidth(thin)) ///
 		saving("$dirpath_results_prelim/heterogeneous_betas_lfit_eb_text.gph", replace)
 
 		
-twoway (kdensity `beta_pick' [w=numobs] if savings==0 & `beta_pick' < `u_thr_beta0' & `beta_pick' > `l_thr_beta0', horizontal lcolor(gs12) lstyle(solid) lwidth(medium)) ///
-	(kdensity `beta_pick' [w=numobs] if savings > 0  & `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta', horizontal lcolor(midblue) lstyle(solid) lwidth(medium) ///
+twoway (kdensity `beta_pick' if savings==0 & `beta_pick' < `u_thr_beta0' & `beta_pick' > `l_thr_beta0', horizontal lcolor(gs12) lstyle(solid) lwidth(medium)) ///
+	(kdensity `beta_pick'  if savings > 0  & `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta', horizontal lcolor(midblue) lstyle(solid) lwidth(medium) ///
 	text(75 -0.04 "B", size(vhuge))) ///
 	, scheme(fb) legend(off) ytitle("") xtitle("Density", color(white)) ///
 	xla(,tlength(0) labcolor(white) labsize(7)) xscale(lcolor(white)) ///
