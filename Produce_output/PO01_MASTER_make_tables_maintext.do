@@ -417,7 +417,7 @@ file write myfile " \\ \midrule " _n
 
 foreach s in "3" "6" "12" {
 if "`s'" == "3" {
-  local panel = "\emph{Panel A: Trim outlier observation}"
+  local panel = "\emph{Panel A: Trim outlier observations}"
 }
 else if "`s'" == "6" {
   local panel = "\emph{Panel B: Trim outlier schools}"
@@ -637,7 +637,7 @@ file write myfile " \\ \midrule " _n
 
 foreach s in "3" "6" "12" {
 if "`s'" == "3" {
-  local panel = "\emph{Panel A: Trim outlier observation}"
+  local panel = "\emph{Panel A: Trim outlier observations}"
 }
 else if "`s'" == "6" {
   local panel = "\emph{Panel B: Trim outlier schools}"
