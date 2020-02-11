@@ -849,10 +849,22 @@ file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
 
-file write myfile "\quad Realization rate" 
+	file write myfile "\quad Realization rate " 
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & donuts == `donuts'
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'&  donuts == `donuts'
+		local savings = r(mean)
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (r(N) != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+file write myfile "\quad Point estimate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& donuts == `donuts'
+	summ beta_aggregate if spec == `i'&  donuts == `donuts'
 		local mean = string(r(mean),"%6.2f")
 	if (r(N) != 0) {
 		file write myfile " & `mean' "
@@ -860,7 +872,7 @@ forvalues i = 1(1)`nspec' {
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& donuts == `donuts'
+			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
 			if (r(N) != 0) {
 				file write myfile " & (`mean') "
@@ -939,10 +951,22 @@ file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
 
-file write myfile "\quad Realization rate" 
+	file write myfile "\quad Realization rate " 
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & donuts == `donuts'
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'&  donuts == `donuts'
+		local savings = r(mean)
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (r(N) != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+file write myfile "\quad Point estimate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& donuts == `donuts'
+	summ beta_aggregate if spec == `i'&  donuts == `donuts'
 		local mean = string(r(mean),"%6.2f")
 	if (r(N) != 0) {
 		file write myfile " & `mean' "
@@ -950,7 +974,7 @@ forvalues i = 1(1)`nspec' {
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& donuts == `donuts'
+			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
 			if (r(N) != 0) {
 				file write myfile " & (`mean') "
@@ -1030,10 +1054,22 @@ file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
 
-file write myfile "\quad Realization rate" 
+	file write myfile "\quad Realization rate " 
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & donuts == `donuts'
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'&  donuts == `donuts'
+		local savings = r(mean)
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (r(N) != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+file write myfile "\quad Point estimate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& donuts == `donuts'
+	summ beta_aggregate if spec == `i'&  donuts == `donuts'
 		local mean = string(r(mean),"%6.2f")
 	if (r(N) != 0) {
 		file write myfile " & `mean' "
@@ -1041,7 +1077,7 @@ forvalues i = 1(1)`nspec' {
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& donuts == `donuts'
+			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
 			if (r(N) != 0) {
 				file write myfile " & (`mean') "
@@ -1119,10 +1155,22 @@ file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
 
-file write myfile "\quad Realization rate" 
+	file write myfile "\quad Realization rate " 
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & donuts == `donuts'
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'&  donuts == `donuts'
+		local savings = r(mean)
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (r(N) != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+file write myfile "\quad Point estimate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& donuts == `donuts'
+	summ beta_aggregate if spec == `i'&  donuts == `donuts'
 		local mean = string(r(mean),"%6.2f")
 	if (r(N) != 0) {
 		file write myfile " & `mean' "
@@ -1130,7 +1178,7 @@ forvalues i = 1(1)`nspec' {
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& donuts == `donuts'
+			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
 			if (r(N) != 0) {
 				file write myfile " & (`mean') "
