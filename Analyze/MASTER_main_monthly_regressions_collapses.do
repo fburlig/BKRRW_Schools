@@ -1,5 +1,23 @@
 ************************************************
-**** ANALYSIS: COLLAPSED TO THE MONTH LEVEL
+**** RUNNING REGRESSIONS MAIN RESULTS
+************************************************
+
+************************************************
+**** SETUP:
+clear all
+set more off, perm
+version 12
+
+global dirpath "T:/Projects/Schools"
+
+** additional directory paths to make things easier
+global dirpath_data "$dirpath/Data"
+global dirpath_data_raw "$dirpath/Data/Raw"
+global dirpath_data_int "$dirpath/Data/Intermediate"
+global dirpath_data_final "$dirpath/Data/Final"
+global dirpath_data_temp "$dirpath/Data/Temp"
+global dirpath_data_other "$dirpath/Data/Other data"
+global dirpath_results_prelim "$dirpath/Results/Preliminary"
 ************************************************
 
 ** set up variables for regression outputs
@@ -27,8 +45,8 @@ foreach depvar in 0 4 {
 foreach subsample in 0 {
 foreach postctrls in "" "post" {
   foreach blocks in any_post_treat cumul_kwh_binary {
-   foreach spec in c f i m h j {
-    foreach collapse in month year {
+   foreach spec in f i m h j {
+    foreach collapse in month {
 	
 	{
 	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
@@ -138,21 +156,20 @@ foreach postctrls in "" "post" {
 			replace any_post_treat = prediction_error_treat9
 		  }
 		  
-		  sort  cds_code
-		  by  cds_code: egen avg_savings_prelim = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-		  egen cumul_kwh_binary = mean(avg_savings_prelim), by(cds_code)
-		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
-		  replace cumul_kwh_binary = cumul_kwh_binary*any_post_treat
-		  drop avg_savings_prelim
-
-		  replace cumul_kwh = -cumul_kwh/(24*365)
-		  replace cumul_kwh_binary = -cumul_kwh_binary/(24*365) 
-
 		  * Davis estimator
-		  qui reghdfe cumul_kwh `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001)
-		  gen davis = -_b[`blocks']/(24*365)
-		  qui summ davis
-		  local davis = r(mean)
+		  replace cumul_kwh = - cumul_kwh / (24*365)
+		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
+		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
+		  
+		  local davis = .
+		  if (strmatch("`blocks'","any_post_treat")) {
+			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
+		  if (strmatch("`blocks'","upgr_counter_all")) {
+			qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
 		  
 		  qui reghdfe prediction_error `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
 		  local nobs = e(N)
@@ -170,21 +187,6 @@ foreach postctrls in "" "post" {
 		  * Regressions
 		  
 		  qui reghdfe prediction_error `blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
-		  /* old code
-		  if ("`blocks'"=="any_post_treat") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-		  }
-		  else if ("`blocks'"=="upgr_counter_all") {
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = -davis2/(24*365)
-			egen davis2 = wtmean(cumul_kwh) if cumul_kwh > 0, weight(numobs)
-			egen count_temp  = wtmean(upgr_counter_all) if cumul_kwh > 0, weight(numobs)
-			replace davis2 = davis/count_temp
-			replace davis2 = -davis/(24*365)
-			drop count_temp
-		  }
-		  */
 		  
 		  restore 
 		  
@@ -230,7 +232,6 @@ foreach postctrls in "" "post" {
 		  replace postctrls = "`postctrls'" in `row'
 		  replace beta_aggregate = _b[`blocks'] in `row'
 		  replace se_aggregate = _se[`blocks'] in `row'
-		  *replace se_mos = `se_mos' in `row'
 		  replace davis_denominator = `davis' in `row'
 		  replace nobs = `nobs' in `row'
 		  replace nschools = e(N_clust) in `row'
@@ -255,6 +256,5 @@ replace stars_aggregate = "^{***}" if pvalue_aggregate < 0.01
 gen ci95_lo_aggregate = beta_aggregate - 1.96*se_aggregate
 gen ci95_hi_aggregate = beta_aggregate + 1.96*se_aggregate
 
-replace davis = davis * -(365*24)
 
 save "$dirpath_data_int/RESULTS_additional_collapses.dta", replace
