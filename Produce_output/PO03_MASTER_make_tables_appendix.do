@@ -954,25 +954,12 @@ file write myfile "\\" _n
 	file write myfile "\quad Realization rate " 
 	forvalues i = 1(1)`nspec' {
 		summ beta_aggregate if spec == `i' & donuts == `donuts'
-		local beta = r(mean)
-		summ davis_denominator if spec == `i'&  donuts == `donuts'
-		local savings = r(mean)
-		local rate = string(`beta'/`savings',"%6.2f")
+		local beta = string(r(mean), "%6.2f")
 		if (r(N) != 0) {
-			file write myfile " & `rate' "
+			file write myfile " & `beta' "
 		}
 	}
 	file write myfile "\\ " _n
-file write myfile "\quad Point estimate" 
-
-forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'&  donuts == `donuts'
-		local mean = string(r(mean),"%6.2f")
-	if (r(N) != 0) {
-		file write myfile " & `mean' "
-	}
-}		
-file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
 			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
@@ -1154,29 +1141,15 @@ else if "`donuts'" == "3" {
 file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
-
 	file write myfile "\quad Realization rate " 
 	forvalues i = 1(1)`nspec' {
 		summ beta_aggregate if spec == `i' & donuts == `donuts'
-		local beta = r(mean)
-		summ davis_denominator if spec == `i'&  donuts == `donuts'
-		local savings = r(mean)
-		local rate = string(`beta'/`savings',"%6.2f")
+		local beta = string(r(mean), "%6.2f")
 		if (r(N) != 0) {
-			file write myfile " & `rate' "
+			file write myfile " & `beta' "
 		}
 	}
 	file write myfile "\\ " _n
-file write myfile "\quad Point estimate" 
-
-forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'&  donuts == `donuts'
-		local mean = string(r(mean),"%6.2f")
-	if (r(N) != 0) {
-		file write myfile " & `mean' "
-	}
-}		
-file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
 			summ se_aggregate if spec == `i'&  donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
@@ -1952,7 +1925,7 @@ replace estimator = "davis" if xvar == "davis binary"
 replace estimator = "reguant" if xvar == ""
 
 keep if yvar == "prediction_error4" & collapse == "month"
-local nspec 6
+local nspec 5
 replace spec = spec-1
 
 capture file close myfile
