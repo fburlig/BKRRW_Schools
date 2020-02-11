@@ -155,16 +155,32 @@ estimateModel <- function(i) {
     
     Y = dataset$qkw_hour
     
-    #prediction.model = cv.glmnet(Xall,Y,foldid=dataset$foldid,family="gaussian",alpha=1)
-    #dataset$prediction_dl1 <- c(predict(prediction.model,Xall,type="link", s = "lambda.min"))
-    #dataset$prediction_dl2 <- c(predict(prediction.model,Xall,type="link", s = "lambda.1se"))
+    # predictions
+    Treat = dataset$any_post_treat
+    prediction.model = cv.glmnet(Xallcontrols,Y,foldid=dataset$foldid,family="gaussian",alpha=1)
+    varnames <- as.data.frame(coef(prediction.model, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model, s = "lambda.1se")@i+1])
+    colnames(varnames) <- "varname"
+    if (mean(Treat) != 0) {
+      prediction.model_treat = cv.glmnet(Xallcontrols,Treat,foldid=dataset$foldid,family="gaussian",alpha=1)
+      varnames2 <- as.data.frame(coef(prediction.model_treat, s = "lambda.1se")@Dimnames[[1]][coef(prediction.model_treat, s = "lambda.1se")@i+1])
+      colnames(varnames2) <- "varname"
+      varnames <- rbind(varnames,varnames2)
+    }
+    varnames <- unique(varnames)
+    names <- as.vector(varnames[,1])
     
-    prediction.modelc = cv.glmnet(Xallcontrols,Y,foldid=dataset$foldid,family="gaussian",alpha=1)
-    dataset$prediction_dl3 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.min"))
-    dataset$prediction_dl4 <- c(predict(prediction.modelc,Xallcontrols,type="link", s = "lambda.1se"))
+    Xsmall <- as.matrix(Xallcontrols[,names])
+    prediction.model <- lm(Y ~ Xsmall)
+    dataset$prediction <- c(predict(prediction.model))
+    
+    dataset$prediction_treat <- Treat
+    if (mean(Treat) != 0) {
+      prediction.model_treat <- lm(Treat ~ Xsmall)
+      dataset$prediction_treat <- c(predict(prediction.model_treat))
+    }
     
     #reduce size
-    dataset <- dataset[,c("date", "qkw_hour", "prediction_dl3", "prediction_dl4")]
+    dataset <- dataset[,c("date", "qkw_hour", "prediction", "prediction_treat")]
     
     write.csv(dataset,file=paste0("Intermediate/School specific/double lasso/school_data_",i,"_prediction_dl_block",b,".csv"))
     

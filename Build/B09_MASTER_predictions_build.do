@@ -58,14 +58,16 @@ cap {
 	gen school_id = `i'
 	gen block = `b'
 	rename qkw_hour qkw
-	rename prediction_dl4 prediction9
+	rename prediction prediction9
+	rename prediction_treat prediction_treat9
 
 	local m = 9
 	replace prediction`m' = 0 if prediction`m' < 0
 	replace prediction`m' = 1500 if prediction`m' > 1500
 	gen prediction_error`m' = qkw - prediction`m'
+	gen prediction_treat_error`m' = any_post_treat - prediction_treat`m'
 	
-	keep date block school_id prediction_error9 
+	keep date block school_id prediction_error9 prediction_treat_error9
 	
 	compress
 	save "$dirpath_data_int/School specific/double lasso/school_data_`i'_prediction_dl`b'.dta", replace	
@@ -147,9 +149,15 @@ forvalues b = 0(1)23 {
 }
 }
 compress
+save "$dirpath_data_int/schools_predictions_by_block.dta", replace
 
 * add forests without forced blocks, double lasso and post
+use "$dirpath_data_int/schools_predictions_by_block.dta", clear
+
+cap drop prediction8
 merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_forest.dta", keep(1 3) nogen keepusing(prediction8)
+
+cap drop prediction_error9
 merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_by_block_dl.dta", keep(1 3) nogen
 
 * clean up forest predictions

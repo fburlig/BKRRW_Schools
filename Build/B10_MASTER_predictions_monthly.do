@@ -29,8 +29,7 @@ gen date_s = date(date, "YMD")
 drop date
 rename date_s date
 
-* reshape long
-keep prediction_error? prediction_error_bs* date block school_id posttrain
+keep prediction*_error? prediction_error_bs* date block school_id posttrain
 
 gen prediction_error10 = (prediction_error1 + prediction_error2+prediction_error3+prediction_error4+prediction_error7+prediction_error8+prediction_error9)/7
 
@@ -93,14 +92,14 @@ forvalues bs = 1(1)20 {
 foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 	di "`pred'"
 	** CREATE MONTHLY FILES AND APPEND
-	foreach subsample in 0 2 3 6 12 13 {
+	foreach subsample in 0 3 6 12 13 {
 	
 		if (`subsample'!=0 & `subsample'!=3 & strmatch("`pred'","_bs*")) {
 			continue
 		}
 		preserve
 		
-		keep prediction_error*`pred' qkw* evertreated any_post_treat posttrain tot* cumul* upgr* cds_code block month year month_of_sample sample*
+		keep prediction*_error`pred' qkw* evertreated any_post_treat posttrain tot* cumul* upgr* cds_code block month year month_of_sample sample*
 		
 		if (`subsample'==3 | `subsample'==12) {
 			gen byte sample3 = 0
@@ -119,13 +118,15 @@ foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 		if `subsample'==12 {
 			gen byte sample12 = sample3 * sample6
 		}
-		keep if sample`subsample'==1
 		
+		keep if sample`subsample'==1
+		keep if prediction_error`pred' != . & cumul_kwh != .
+	
 		gen byte numobs = 1
-		gcollapse (mean) prediction_error`pred' qkw* tot* cumul* upgr* ///
+		gcollapse (mean) prediction*_error`pred' qkw* tot* cumul* upgr* ///
 			(sum) numobs, by(cds_code block month year month_of_sample any_post_treat posttrain)
 		rename prediction_error`pred' prediction_error
-		
+
 		gen byte sample = `subsample'
 		compress
 		save "$dirpath_data_temp/monthly_by_block`pred'_sample`subsample'.dta", replace
