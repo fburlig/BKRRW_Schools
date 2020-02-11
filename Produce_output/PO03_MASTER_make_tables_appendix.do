@@ -3,7 +3,87 @@
 ************************************************
 
 ** Table B.1: Panel FE (Alternative SEs)
-// THIS STILL NEEDS TO BE UPDATED WITH THE BOOTSTRAP SE
+{
+use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
+replace spec = 7 if spec == 6
+keep if spec==7
+append using "$dirpath_data_int/RESULTS_monthly.dta"
+keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0"
+local nspec 6
+replace spec = spec-1
+
+drop if postctrls == "post"
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/Appendix/tab_aggregate_regressions_2wayclus_binary.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " 
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n ///
+"\toprule " _n
+file write myfile "Clustering" 
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+}
+file write myfile " \\ \midrule " _n
+file write myfile "" 
+forvalues i = 1(1)`nspec' {
+	summ beta_aggregate if spec == `i'
+	local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean'"
+	}
+}		
+file write myfile "\\  School " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'
+		    local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+		
+file write myfile "\\  School, month of sample " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_mos if spec == `i'
+		    local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & [`mean'] "
+			}
+		}		
+		
+file write myfile "\\ "_n
+
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	file write myfile "\midrule " _n 
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes & Yes \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes & Yes \\" _n
+file write myfile "Time trend & No & No & Yes & No & No & No \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes & Yes\\" _n
+file write myfile "Temp. Ctrl & No & No & No & No & No & Yes\\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+
+}
 
 ** Table B.2: Panel FE results (average school specific estimates; outliers)
 {
@@ -12,9 +92,9 @@ replace spec = 7 if spec == 6
 keep if spec==7
 keep if xvar == "reguant binary"
 replace xvar = "savings binary" if xvar == "reguant binary"
-append using "$dirpath_data_int/RESULTS_monthly_savings.dta"
+append using "$dirpath_data_int/RESULTS_monthly.dta"
 
-keep if xvar =="savings binary" & yvar == "qkw_hour" 
+keep if xvar =="savings binary" & yvar == "qkw_hour" & postctrls == "" 
 
 keep if subsample == "3" | subsample == "6" | subsample == "12"
 
@@ -48,7 +128,7 @@ file write myfile " \\ \midrule " _n
 
 foreach s in "3" "6" "12" {
 if "`s'" == "3" {
-  local panel = "\emph{Panel A: Trim outlier observation}"
+  local panel = "\emph{Panel A: Trim outlier observations}"
 }
 else if "`s'" == "6" {
   local panel = "\emph{Panel B: Trim outlier schools}"
@@ -296,18 +376,197 @@ file close myfile
 }
 
 ** Table B.5: ML (Alternative SEs)
-// THIS STILL NEEDS TO BE UPDATED WITH THE BOOTSTRAP SE
+{
+use "$dirpath_data_int/RESULTS_monthly.dta", clear
+keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
+local nspec 5
+replace spec = spec-1
+
+drop if postctrls == "post"
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/Appendix/tab_aggregate_predictions_2wayclus_binary.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " 
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n ///
+"\toprule " _n
+file write myfile "Clustering" 
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+}
+file write myfile " \\ \midrule " _n
+file write myfile "" 
+forvalues i = 1(1)`nspec' {
+	summ beta_aggregate if spec == `i'
+	local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean'"
+	}
+}		
+file write myfile "\\  School " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'
+		    local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+		
+file write myfile "\\  School, month of sample " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_mos if spec == `i'
+		    local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & [`mean'] "
+			}
+		}		
+		
+file write myfile "\\ "_n
+
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	file write myfile "\midrule " _n 
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
+file write myfile "Time trend & No & No & Yes & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+
+}
+
+** Table 4: Machine learning results (bootstrap)
+{
+use "$dirpath_data_int/RESULTS_monthly_bootstrap.dta", clear
+keep if xvar =="davis binary" & postctrls == "post"
+replace spec = spec-1
+local nspec 5
+gen estimator = "davis"
+replace subsample = "0"
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_bootstrap.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+} 
+
+file write myfile " \\ \midrule " _n
+
+local s = 0
+
+foreach estimator in "davis" {
+if "`estimator'" == "davis" {
+  local panel = "\emph{Average program estimates}"
+  local vtitle1 = "Realization rate"
+  local vtitle2 = "Point estimate"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+
+file write myfile "\\" _n
+if "`vtitle1'" == "Realization rate" {
+     file write myfile "\quad `vtitle1'"
+	forvalues i = 1(1)`nspec' {
+		summ beta_aggregate if spec == `i' & subsample == "`s'" & estimator == "`estimator'"
+		local beta = r(mean)
+		summ davis_denominator if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		local savings = r(mean)
+		if "`estimator'" == "reguant'" {
+		local savings = 1 
+		}
+		local rate = string(`beta'/`savings',"%6.2f")
+		if (`r(N)' != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+}
+    file write myfile "\quad `vtitle2'"
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		local mean = string(r(mean),"%6.2f")
+	if (`r(N)' != 0)  {
+		file write myfile " & `mean' "
+	}
+}		
+file write myfile "\\ " _n
+		forvalues i = 1(1)`nspec' {
+			summ beta_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+			local se_mean = `r(sd)' 
+			local bs_se = string(`se_mean', "%6.2f")
+			file write myfile " & (`bs_se') "
+			
+		}
+file write myfile "\\ "_n
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		if (`r(N)' != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	
+
+	file write myfile "\midrule " _n 
+}
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
+file write myfile "Time trend & No & No & Yes & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+}
 
 ** Table B.6: Machine learning effects (average school specific estimates; outliers)
 {
-
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
-keep if xvar =="savings binary" & yvar == "prediction_error4" & postctrls=="post"
+
+keep if xvar =="savings binary" & yvar == "prediction_error4" & postctrls == "" 
 
 keep if subsample == "3" | subsample == "6" | subsample == "12"
 
-replace spec = spec - 1
-local nspec 5
+local nspec 6
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_reguant_samples.tex", write replace
@@ -337,7 +596,7 @@ file write myfile " \\ \midrule " _n
 
 foreach s in "3" "6" "12" {
 if "`s'" == "3" {
-  local panel = "\emph{Panel A: Trim outlier observation}"
+  local panel = "\emph{Panel A: Trim outlier observations}"
 }
 else if "`s'" == "6" {
   local panel = "\emph{Panel B: Trim outlier schools}"
@@ -349,8 +608,8 @@ else if "`s'" == "12" {
 file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
 file write myfile "\\" _n
 
-	file write myfile "\quad Realization rate " 
- 
+
+file write myfile "\quad Realization rate" 
 
 forvalues i = 1(1)`nspec' { 
 	summ beta_aggregate if spec == `i'& subsample == "`s'"
@@ -541,29 +800,16 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.9: Panel fixed effects results (donuts)
-// need to add temperature
+** Table B.9: Panel fixed effects results (donuts -- davis)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0"
+keep if postctrls == ""
 local nspec 6
 replace spec = spec-1
-gen estimator = "davis"
-tempfile davis
-save "`davis'"
-
-use "$dirpath_data_int/RESULTS_monthly_savings_DONUTS.dta", clear
-keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0"
-local nspec 6
-replace spec = spec-1
-gen estimator = "reguant"
-
-append using "`davis'"
-
-keep if spec == 5
 
 capture file close myfile
-file open myfile using "$dirpath_results_final/tab_aggregate_regressions_binary_davis_reguant_DONUTS.tex", write replace
+file open myfile using "$dirpath_results_final/tab_aggregate_regressions_binary_davis_donuts.tex", write replace
 if "`standalone'" == "_standalone" {
  file write myfile "\documentclass[12pt]{article}" _n
  file write myfile "\usepackage{amsmath}" _n
@@ -588,62 +834,43 @@ forvalues i = 1(1)`nspec' {
 
 file write myfile " \\ \midrule " _n
 
-local s = 0
-
-foreach estimator in "davis" "reguant"  {
-if "`estimator'" == "davis" {
-  local panel = "\emph{Panel A: Average program estimates}"
-  local vtitle1 = "Realization rate"
-  local vtitle2 = "Point estimate"
+foreach donuts in 1 2 3 {
+if "`donuts'" == "1" {
+  local panel = "\emph{Panel A: Drop $\pm$ 1 month}"
 }
-else if "`estimator'" == "reguant" {
-  local panel = "\emph{Panel B: Average school-specific estimates}"
-  local vtitle1 = ""
-  local vtitle2 = "Realization rate"
+else if "`donuts'" == "2" {
+  local panel = "\emph{Panel B: Drop $\pm$ 2 months}"
+}
+else if "`donuts'" == "3" {
+  local panel = "\emph{Panel C: Drop $\pm$ 3 months}"
 }
 
 file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
-
 file write myfile "\\" _n
-if "`vtitle1'" == "Realization rate" {
-     file write myfile "\quad `vtitle1'"
-	forvalues i = 1(1)`nspec' {
-		summ beta_aggregate if donuts == `i' & subsample == "`s'" & estimator == "`estimator'"
-		local beta = r(mean)
-		summ davis_denominator if donuts == `i'& subsample == "`s'" & estimator == "`estimator'"
-		local savings = r(mean)
-		if "`estimator'" == "reguant'" {
-		local savings = 1 
-		}
-		local rate = string(`beta'/`savings',"%6.2f")
-		if (`r(N)' != 0) {
-			file write myfile " & `rate' "
-		}
-	}
-	file write myfile "\\ " _n
-}
-    file write myfile "\quad `vtitle2'"
+
+
+file write myfile "\quad Realization rate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if donuts == `i'& subsample == "`s'" & estimator == "`estimator'"
+	summ beta_aggregate if spec == `i'& donuts == `donuts'
 		local mean = string(r(mean),"%6.2f")
-	if (`r(N)' != 0)  {
+	if (r(N) != 0) {
 		file write myfile " & `mean' "
 	}
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if donuts == `i'& subsample == "`s'" & estimator == "`estimator'"
+			summ se_aggregate if spec == `i'& donuts == `donuts'
 				local mean = string(r(mean),"%6.2f")
-			if (`r(N)' != 0) {
+			if (r(N) != 0) {
 				file write myfile " & (`mean') "
 			}
 		}
 file write myfile "\\ "_n
 	file write myfile "\quad Observations" 
 	forvalues i = 1(1)`nspec' {
-		summ nobs if donuts == `i'& subsample == "`s'" & estimator == "`estimator'"
-		if (`r(N)' != 0) {
+		summ nobs if spec == `i'& donuts == `donuts'
+		if (r(N) != 0) {
 			file write myfile " & " %10.0fc (r(mean)) " "
 		}
 	}
@@ -654,14 +881,284 @@ file write myfile "\\ "_n
 }
 
 file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes & Yes \\" _n
-file write myfile "School-Hour-Month FE & Yes & Yes & Yes & Yes & Yes & Yes  \\" _n
-file write myfile "Month of Sample FE & Yes & Yes & Yes & Yes & Yes & Yes \\" _n
-file write myfile "Dropped months & 1 & 2 & 3 & 4 & 5 & 6 \\" _n
-
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes & Yes \\" _n
+file write myfile "Time trend & No & No & Yes & No & No & No \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes & Yes\\" _n
+file write myfile "Temp. Ctrl & No & No & No & No & No & Yes\\" _n
 file write myfile "\bottomrule " _n 
 file write myfile "\end{tabular*}" _n
 file close myfile
 }
+
+** Table B.9: Panel fixed effects results (donuts -- reguant)
+{
+use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
+keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0"
+keep if postctrls == ""
+local nspec 6
+replace spec = spec-1
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/tab_aggregate_regressions_binary_reguant_donuts.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+} 
+
+file write myfile " \\ \midrule " _n
+
+foreach donuts in 1 2 3 {
+if "`donuts'" == "1" {
+  local panel = "\emph{Panel A: Drop $\pm$ 1 month}"
+}
+else if "`donuts'" == "2" {
+  local panel = "\emph{Panel B: Drop $\pm$ 2 months}"
+}
+else if "`donuts'" == "3" {
+  local panel = "\emph{Panel C: Drop $\pm$ 3 months}"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+file write myfile "\\" _n
+
+
+file write myfile "\quad Realization rate" 
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& donuts == `donuts'
+		local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean' "
+	}
+}		
+file write myfile "\\ " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'& donuts == `donuts'
+				local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+file write myfile "\\ "_n
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'& donuts == `donuts'
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	
+
+	file write myfile "\midrule " _n 
+}
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes & Yes \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes & Yes \\" _n
+file write myfile "Time trend & No & No & Yes & No & No & No \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes & Yes\\" _n
+file write myfile "Temp. Ctrl & No & No & No & No & No & Yes\\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+}
+
+
+** Table B.9: Machine learning effects results (donuts -- davis)
+{
+use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
+keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
+keep if postctrls == "post"
+local nspec 5
+replace spec = spec-1
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_davis_donuts.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+} 
+
+file write myfile " \\ \midrule " _n
+
+foreach donuts in 1 2 3 {
+if "`donuts'" == "1" {
+  local panel = "\emph{Panel A: Drop $\pm$ 1 month}"
+}
+else if "`donuts'" == "2" {
+  local panel = "\emph{Panel B: Drop $\pm$ 2 months}"
+}
+else if "`donuts'" == "3" {
+  local panel = "\emph{Panel C: Drop $\pm$ 3 months}"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+file write myfile "\\" _n
+
+
+file write myfile "\quad Realization rate" 
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& donuts == `donuts'
+		local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean' "
+	}
+}		
+file write myfile "\\ " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'& donuts == `donuts'
+				local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+file write myfile "\\ "_n
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'& donuts == `donuts'
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	
+
+	file write myfile "\midrule " _n 
+}
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
+file write myfile "Time trend & No & No & Yes & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+}
+
+** Table B.9: Machine learning effects results (donuts -- reguant)
+{
+use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
+keep if xvar =="savings binary" & yvar == "prediction_error4" & subsample== "0"
+keep if postctrls == "post"
+local nspec 5
+replace spec = spec-1
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_reguant_donuts.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+} 
+
+file write myfile " \\ \midrule " _n
+
+foreach donuts in 1 2 3 {
+if "`donuts'" == "1" {
+  local panel = "\emph{Panel A: Drop $\pm$ 1 month}"
+}
+else if "`donuts'" == "2" {
+  local panel = "\emph{Panel B: Drop $\pm$ 2 months}"
+}
+else if "`donuts'" == "3" {
+  local panel = "\emph{Panel C: Drop $\pm$ 3 months}"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+file write myfile "\\" _n
+
+
+file write myfile "\quad Realization rate" 
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& donuts == `donuts'
+		local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean' "
+	}
+}		
+file write myfile "\\ " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'& donuts == `donuts'
+				local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+file write myfile "\\ "_n
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'& donuts == `donuts'
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	
+
+	file write myfile "\midrule " _n 
+}
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
+file write myfile "Time trend & No & No & Yes & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+}
+
 
 ** Table B.10: Machine learning results (donuts)
 {
@@ -789,6 +1286,7 @@ file close myfile
 use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
 keep if spec==7
+replace xvar = "davis continuous (counter)" if xvar == "" & davis_denominator != .
 keep if xvar == "davis continuous (counter)" & yvar == "qkw_hour" & subsample == "0"
 
 append using "$dirpath_data_int/RESULTS_monthly.dta"
@@ -801,14 +1299,17 @@ save "`davis'"
 use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
 keep if spec==7
+replace xvar = "savings continuous" if xvar == "" & davis_denominator == .
 keep if xvar == "savings continuous" & yvar == "qkw_hour" & subsample == "0"
-append using  "$dirpath_data_int/RESULTS_monthly_savings.dta"
+append using  "$dirpath_data_int/RESULTS_monthly.dta"
 keep if xvar =="savings continuous" & yvar == "qkw_hour" & subsample== "0"
 local nspec 5
 replace spec = spec-1
 gen estimator = "reguant"
 
 append using "`davis'"
+
+drop if postctrls == "post"
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_regressions_continuous_davis_reguant.tex", write replace
@@ -927,6 +1428,9 @@ gen estimator = "reguant"
 
 append using "`davis'"
 
+keep if postctrls != ""
+drop if spec == 0
+
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_predictions_continuous_davis_reguant.tex", write replace
 if "`standalone'" == "_standalone" {
@@ -1029,10 +1533,9 @@ file close myfile
 
 ** Table B.15: Panel fixed effects results (all hourly)
 {
-use "$dirpath_data_int/RESULTS_hourly_withtemp.dta", clear
+use "$dirpath_data_int/RESULTS_hourly_withtemp_wsavings.dta", clear
 replace spec = 7 if spec == 6
 keep if spec==7
-keep if strpos(fe, "##c.temp")
 append using "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta"
 keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0"
 local nspec 6
@@ -1041,13 +1544,12 @@ gen estimator = "davis"
 tempfile davis
 save "`davis'"
 
-use "$dirpath_data_int/RESULTS_hourly_withtemp_savings.dta", clear
+use "$dirpath_data_int/RESULTS_hourly_withtemp_wsavings.dta", clear
+keep if yvar == "qkw_hour" & subsample == "0"
 replace spec = 7 if spec == 6
 keep if spec==7
-replace xvar = "savings binary" if beta >= 0
-
+replace xvar = "savings binary" if xvar == ""
 keep if xvar == "savings binary"
-keep if strpos(fe, "##c.temp")
 append using "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta"
 replace xvar = "savings binary" if xvar == "reguant binary"
 keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0"
@@ -1056,6 +1558,9 @@ replace spec = spec-1
 gen estimator = "reguant"
 
 append using "`davis'"
+
+drop if postctrls == "post"
+drop if spec == 0
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_regressions_binary_davis_reguant_allhourly.tex", write replace
@@ -1167,14 +1672,16 @@ gen estimator = "davis"
 tempfile davis
 save "`davis'"
 
-use  "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta", clear
+use "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta", clear
 replace xvar = "savings binary" if xvar == "reguant binary"
 keep if xvar =="savings binary" & yvar == "prediction_error4" & subsample== "0"
 local nspec 5
 replace spec = spec-1
 gen estimator = "reguant"
-
 append using "`davis'"
+
+drop if postctrls != "post"
+drop if spec == 0
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_davis_reguant_allhourly.tex", write replace
@@ -1500,6 +2007,8 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
+
+/*
 ** Table B.24: Machine learning results (double LASSO)
 {
 use"$dirpath_data_int/RESULTS_monthly_doublelasso.dta", clear
@@ -1608,3 +2117,4 @@ file write myfile "\bottomrule " _n
 file write myfile "\end{tabular*}" _n
 file close myfile
 }
+*/

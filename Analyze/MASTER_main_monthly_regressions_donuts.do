@@ -27,14 +27,17 @@ foreach donuts in 1 2 3 {
 foreach depvar in 0 4 /*7 9 10 11*/ {
 foreach subsample in 0 /*3 6 12 13 */ {
 foreach postctrls in "" "post" {
-  foreach blocks in any_post_treat /*upgr_counter_all*/ {
-   foreach spec in f i m h j {
+  foreach blocks in any_post_treat cumul_kwh_binary {
+   foreach spec in f i m h j k {
 	 {
 	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
 		continue
 	 }
 	 else if (`depvar'!=0 & `depvar'!=9) & ("`postctrls'"=="") {
 		continue
+	 }
+	 if (`depvar' == 4) & ("`spec'" == "k") {
+	   continue
 	 }
 	 local ctrls = ""
 	 local clstrs = "cds_code"
@@ -63,6 +66,11 @@ foreach postctrls in "" "post" {
 	   local fes = "cds_code#block#month"
 	   replace spec = 4 in `row'
 	  }
+      else if "`spec'" == "k" {
+	   local ctrls = ""
+	   local fes = "cds_code#block#month month_of_sample cds_code##c.daily_t_max cds_code##c.daily_t_min cds_code##c.daily_t_mean "
+	   replace spec = 7 in `row'
+	  }
 	  if "`postctrls'" == "post" {
 	   local ctrls = "`ctrls' c.posttrain"
 	  } 
@@ -73,7 +81,9 @@ foreach postctrls in "" "post" {
 		  preserve
 		 
 		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
-		  
+		  // this is a m:1 merge because we collapse by posttrain
+		  merge m:1 cds_code year month block using "$dirpath_data_int/school_weather_MASTER_monthly.dta", keep(3)
+
 		  egen treat_month_prelim = min(month_of_sample) if posttrain == 1, by(cds_code)
 		  egen treat_month = mean(treat_month_prelim), by(cds_code)
 		
@@ -83,13 +93,21 @@ foreach postctrls in "" "post" {
 
 		  drop treat_month* months_to 
 		  
+		  sort cds_code
 		  * Davis estimator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
 		  by cds_code: egen cumul_kwh_binary = wtmean(cumul_kwh) if cumul_kwh < 0, weight(numobs)
 		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
-		  qui reghdfe cumul_kwh_binary any_post_treat `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-		  local davis = _b[any_post_treat]
+		  local davis = .
+		  if (strmatch("`blocks'","any_post_treat")) {
+			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
+		  if (strmatch("`blocks'","upgr_counter_all")) {
+			qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+			local davis = _b[`blocks']
+		  }
 		  
 		  * Regressions
 		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
@@ -105,8 +123,8 @@ foreach postctrls in "" "post" {
 		  if ("`blocks'"=="any_post_treat") {
 			replace xvar = "davis binary" in `row'
 		  }
-		  else if ("`blocks'"=="upgr_counter_all") {
-			replace xvar = "davis continuous (counter)" in `row'
+		  else if ("`blocks'"=="cumul_kwh_binary") {
+			replace xvar = "savings binary" in `row'
 		  }
 		  
 		  if "`depvar'" == "0" {
