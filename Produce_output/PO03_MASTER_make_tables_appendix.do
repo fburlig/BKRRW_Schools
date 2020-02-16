@@ -653,10 +653,13 @@ file close myfile
 {
 
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
+append using "$dirpath_data_int/RESULTS_monthly_dl.dta"
 keep if xvar =="davis binary"  & subsample== "0" & spec == 6
-
 drop if strpos(yvar, "qkw_hour")
-drop if strpos(yvar, "prediction_error") & controls == ""
+
+drop if strpos(yvar, "prediction_error") & controls == "" & yvar != "prediction_error9"
+
+
 
 local predtypes "1 2 3 4 7 8 9 10"
 
@@ -991,7 +994,6 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-
 ** Table B.9: Machine learning effects results (donuts -- davis)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
@@ -1179,7 +1181,6 @@ file write myfile "\bottomrule " _n
 file write myfile "\end{tabular*}" _n
 file close myfile
 }
-
 
 ** Table B.10: Machine learning results (donuts)
 {
@@ -2028,19 +2029,17 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-
-/*
 ** Table B.24: Machine learning results (double LASSO)
 {
-use"$dirpath_data_int/RESULTS_monthly_doublelasso.dta", clear
-gen estimator = ""
-replace estimator = "davis" if xvar == "davis binary"
-replace estimator = "reguant" if xvar == ""
-replace spec = spec-1
+use"$dirpath_data_int/RESULTS_monthly_dl.dta", clear
+
+keep if subsample == "0" | subsample ==  "3" | subsample == "6" | subsample == "12"
 
 local nspec 5
+replace spec=spec-1
+
 capture file close myfile
-file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_davis_reguant_doublelasso.tex", write replace
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_dl.tex", write replace
 if "`standalone'" == "_standalone" {
  file write myfile "\documentclass[12pt]{article}" _n
  file write myfile "\usepackage{amsmath}" _n
@@ -2065,62 +2064,58 @@ forvalues i = 1(1)`nspec' {
 
 file write myfile " \\ \midrule " _n
 
-local s = 0
-
-foreach estimator in "davis" "reguant"  {
-if "`estimator'" == "davis" {
-  local panel = "\emph{Panel A: Average program estimates}"
-  local vtitle1 = "Realization rate"
-  local vtitle2 = "Point estimate"
+foreach s in "0" "3" "6" "12" {
+if "`s'" == "0" {
+  local panel = "\emph{Panel A: No trim}"
 }
-else if "`estimator'" == "reguant" {
-  local panel = "\emph{Panel B: Average school-specific estimates}"
-  local vtitle1 = ""
-  local vtitle2 = "Realization rate"
+if "`s'" == "3" {
+  local panel = "\emph{Panel B: Trim outlier observations}"
+}
+else if "`s'" == "6" {
+  local panel = "\emph{Panel C: Trim outlier schools}"
+}
+else if "`s'" == "12" {
+  local panel = "\emph{Panel D: Trim observations and schools}"
 }
 
 file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
-
 file write myfile "\\" _n
-if "`vtitle1'" == "Realization rate" {
-     file write myfile "\quad `vtitle1'"
+
+	file write myfile "\quad Realization rate " 
 	forvalues i = 1(1)`nspec' {
-		summ beta_aggregate if spec == `i' & subsample == "`s'" & estimator == "`estimator'"
+		summ beta_aggregate if spec == `i' & subsample == "`s'"
 		local beta = r(mean)
-		summ davis_denominator if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+		summ davis_denominator if spec == `i'& subsample == "`s'"
 		local savings = r(mean)
-		if "`estimator'" == "reguant'" {
-		local savings = 1 
-		}
 		local rate = string(`beta'/`savings',"%6.2f")
-		if (`r(N)' != 0) {
+		if (r(N) != 0) {
 			file write myfile " & `rate' "
 		}
 	}
 	file write myfile "\\ " _n
-}
-    file write myfile "\quad `vtitle2'"
+
+file write myfile "\quad Point estimate" 
 
 forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+	summ beta_aggregate if spec == `i'& subsample == "`s'"
 		local mean = string(r(mean),"%6.2f")
-	if (`r(N)' != 0)  {
+	if (r(N) != 0) {
 		file write myfile " & `mean' "
 	}
 }		
 file write myfile "\\ " _n
 		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
+			summ se_aggregate if spec == `i'& subsample == "`s'"
 				local mean = string(r(mean),"%6.2f")
-			if (`r(N)' != 0) {
+			if (r(N) != 0) {
 				file write myfile " & (`mean') "
 			}
 		}
 file write myfile "\\ "_n
 	file write myfile "\quad Observations" 
 	forvalues i = 1(1)`nspec' {
-		summ nobs if spec == `i'& subsample == "`s'" & estimator == "`estimator'"
-		if (`r(N)' != 0) {
+		summ nobs if spec == `i'& subsample == "`s'"
+		if (r(N) != 0) {
 			file write myfile " & " %10.0fc (r(mean)) " "
 		}
 	}
@@ -2138,4 +2133,3 @@ file write myfile "\bottomrule " _n
 file write myfile "\end{tabular*}" _n
 file close myfile
 }
-*/
