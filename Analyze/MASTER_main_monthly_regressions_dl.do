@@ -2,7 +2,6 @@
 **** ANALYSIS: MONTHLY REGRESSIONS
 ************************************************
 
-
 ** set up variables for regression outputs
 clear
 gen yvar = ""
@@ -24,10 +23,10 @@ gen r2 = .
 set obs 2000
 
 local row = 1
-foreach depvar in 0 1 2 3 4 7 8 10 {
+foreach depvar in 9 {
 foreach subsample in 0 3 6 12 13 {
 foreach postctrls in "" "post" {
-  foreach blocks in any_post_treat upgr_counter_all cumul_kwh_binary cumul_kwh {
+  foreach blocks in any_post_treat {
    foreach spec in f i m h j {
 	 {
 
@@ -70,9 +69,7 @@ foreach postctrls in "" "post" {
 		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
 		  
 		  * use partialled out dummy
-		  if ("`depvar'"=="9") {
-			replace any_post_treat = prediction_treat_error
-		  }	
+		  gegen evertreated = max(any_post_treat), by(cds_code)
 		  
 		  * Davis estimator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
@@ -80,20 +77,14 @@ foreach postctrls in "" "post" {
 		  replace cumul_kwh_binary = 0 if cumul_kwh_binary == .
 		  
 		  local davis = .
-		  if (strmatch("`blocks'","any_post_treat")) {
-			qui reghdfe cumul_kwh_binary `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-			local davis = _b[`blocks']
-		  }
-		  if (strmatch("`blocks'","upgr_counter_all")) {
-			qui reghdfe cumul_kwh `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
-			local davis = _b[`blocks']
-		  }
+		  qui reghdfe cumul_kwh_binary evertreated##c.prediction_treat_error `ctrls' [fw=numobs], absorb(`fes') tol(0.001)
+		  local davis = _b[1.evertreated#c.prediction_treat_error9]
 		  
 		  * Regressions
-		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
-		  local se_mos = _se[`blocks']
+		  qui reghdfe prediction_error evertreated##c.prediction_treat_error `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(cds_code month_of_sample)
+		  local se_mos = _se[1.evertreated#c.prediction_treat_error9]
 		  
-		  qui reghdfe prediction_error `blocks' `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
+		  qui reghdfe prediction_error evertreated##c.prediction_treat_error `ctrls' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
 		  
 		  restore 
 		  
@@ -115,36 +106,18 @@ foreach postctrls in "" "post" {
 		  else if ("`blocks'"=="cumul_kwh") {
 			replace xvar = "savings continuous" in `row'
 		  }
-		  
-		  if "`depvar'" == "0" {
-			replace ylab = "Electricity consumption (kWh)" in `row'
-		  }
-		  if "`depvar'" == "3" {
-			replace ylab = "Prediction error (kWh) - Min" in `row'
-		  }
-		  if "`depvar'" == "4" {
-			replace ylab = "Prediction error (kWh) - Baseline" in `row'
-		  }
-		  if "`depvar'" == "7" {
-			replace ylab = "Prediction error (kWh) - Forest" in `row'
-		  }
-		  if "`depvar'" == "7" {
-			replace ylab = "Prediction error (kWh) - Forest Joint" in `row'
-		  }
+
 		  if "`depvar'" == "9" {
 			replace ylab = "Prediction error (kWh) - Double Lasso" in `row'
 		  }
-		  if "`depvar'" == "10" {
-			replace ylab = "Prediction error (kWh) - Average" in `row'
-		  }  
 		  
 		  replace fe = "`fes'" in `row'
 		  replace clustering = "`clstrs'" in `row'
 		  replace controls = "`ctrls'" in `row'
 		  replace subsample = "`subsample'" in `row'
 		  replace postctrls = "`postctrls'" in `row'
-		  replace beta_aggregate = _b[`blocks'] in `row'
-		  replace se_aggregate = _se[`blocks'] in `row'
+		  replace beta_aggregate = _b[1.evertreated#c.prediction_treat_error9] in `row'
+		  replace se_aggregate = _se[1.evertreated#c.prediction_treat_error9] in `row'
 		  replace se_mos = `se_mos' in `row'
 		  replace davis_denominator = `davis' in `row'
 		  replace nobs = e(N) in `row'
@@ -161,5 +134,5 @@ foreach postctrls in "" "post" {
 
 keep yvar - r2
 keep if yvar != ""
-gen rate = beta_aggregate / davis_denominator
-save "$dirpath_data_int/RESULTS_monthly.dta", replace
+gen rate = - beta_aggregate / davis_denominator
+save "$dirpath_data_int/RESULTS_monthly_dl.dta", replace

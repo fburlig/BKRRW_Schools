@@ -7,10 +7,41 @@ summ school_id
 local schoolidmax = r(max)
 di `schoolidmax'
 
+local build_forest_dl = 0
 local build_forest = 0
-local build_dl = 1
+local build_dl = 0
 local build_prediction = 0
 local build_varnames = 0
+
+if (`build_forest_dl'==1) {
+*** PREDICTIONS BY BLOCKS *FOREST*
+clear
+cd "$dirpath_data_int/School specific/forest"
+forvalues i = 1(1)`schoolidmax' {
+di `i'
+cap rm school_data_`i'_prediction_forest.dta
+cap {
+
+	insheet using "$dirpath_data_int/School specific/forest/school_data_`i'_prediction_dl.csv", clear comma
+
+	compress
+	save "$dirpath_data_int/School specific/forest/school_data_`i'_prediction_forest_dl.dta", replace	
+
+}
+}
+****
+
+clear
+cap rm $dirpath_data_int/schools_predictions_forest.dta
+cd "$dirpath_data_int/School specific/forest"
+forvalues i = 1(1)`schoolidmax' {
+	cap append using "school_data_`i'_prediction_forest_dl.dta"
+}
+compress
+cap drop v1 num*
+save "$dirpath_data_int/schools_predictions_forest_dl.dta", replace
+}
+***
 
 if (`build_forest'==1) {
 *** PREDICTIONS BY BLOCKS *FOREST*
@@ -62,12 +93,11 @@ cap {
 	rename prediction_treat prediction_treat9
 
 	local m = 9
-	replace prediction`m' = 0 if prediction`m' < 0
-	replace prediction`m' = 1500 if prediction`m' > 1500
+	*replace prediction`m' = 0 if prediction`m' < 0
+	*replace prediction`m' = 1500 if prediction`m' > 1500
 	gen prediction_error`m' = qkw - prediction`m'
-	gen prediction_treat_error`m' = any_post_treat - prediction_treat`m'
 	
-	keep date block school_id prediction_error9 prediction_treat_error9
+	keep date block school_id prediction_error9 prediction_treat9
 	
 	compress
 	save "$dirpath_data_int/School specific/double lasso/school_data_`i'_prediction_dl`b'.dta", replace	
@@ -116,16 +146,16 @@ cap {
 	* censoring prediction to avoid waky splines out of sample, generate errors
 	forvalues m = 1(1)7 {
 		cap {
-			replace prediction`m' = 0 if prediction`m' < 0
-			replace prediction`m' = 1500 if prediction`m' > 1500
+			*replace prediction`m' = 0 if prediction`m' < 0
+			*replace prediction`m' = 1500 if prediction`m' > 1500
 			gen prediction_error`m' = qkw - prediction`m'
 		}
 	}
 	
 	forvalues m = 1(1)20 {
 		cap {
-			replace predbs`m' = 0 if predbs`m' < 0
-			replace predbs`m' = 1500 if predbs`m' > 1500
+			*replace predbs`m' = 0 if predbs`m' < 0
+			*replace predbs`m' = 1500 if predbs`m' > 1500
 			gen prediction_error_bs`m' = qkw - predbs`m' 
 		}
 	}
@@ -151,20 +181,19 @@ forvalues b = 0(1)23 {
 compress
 save "$dirpath_data_int/schools_predictions_by_block.dta", replace
 
-* add forests without forced blocks, double lasso and post
+* add forests without forced blocks, double lasso
 use "$dirpath_data_int/schools_predictions_by_block.dta", clear
 
 cap drop prediction8
 merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_forest.dta", keep(1 3) nogen keepusing(prediction8)
-
+gen prediction_error8 = qkw - prediction8
+ 
 cap drop prediction_error9
-merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_by_block_dl.dta", keep(1 3) nogen
-
-* clean up forest predictions
-local m = 8
-replace prediction`m' = 0 if prediction`m' < 0
-replace prediction`m' = 1500 if prediction`m' > 1500
-gen prediction_error`m' = qkw - prediction`m' 
+cap drop prediction_treat_error9
+cap drop splitting
+cap drop posttrain_dl
+merge 1:1 school_id block date using "$dirpath_data_int/schools_predictions_forest_dl.dta", keep(1 3) nogen
+rename post_treat posttrain_dl
 
 cap drop prediction? 
 cap drop prediction_log?

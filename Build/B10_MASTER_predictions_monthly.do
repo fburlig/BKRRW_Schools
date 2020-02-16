@@ -9,7 +9,7 @@ use "$dirpath_data_int/schools_predictions_by_block.dta", clear
 
 rename qkw prediction_error0
 
-keep date block school_id prediction* train*
+keep date block school_id prediction* train* splitting posttrain_dl
 
 * drop unbalanced days
 gsort school_id date block
@@ -29,9 +29,9 @@ gen date_s = date(date, "YMD")
 drop date
 rename date_s date
 
-keep prediction*_error? prediction_error_bs* date block school_id posttrain
+keep prediction*_error? prediction_error_bs* date block school_id posttrain* splitting
 
-gen prediction_error10 = (prediction_error1 + prediction_error2+prediction_error3+prediction_error4+prediction_error7+prediction_error8+prediction_error9)/7
+gen prediction_error10 = (prediction_error1 + prediction_error2+prediction_error3+prediction_error4+prediction_error7+prediction_error8)/6
 
 merge m:1 school_id using "$dirpath_data_int/School specific/schoolid_cdscode_map.dta", keep(3) nogen
 drop school_id
@@ -78,8 +78,8 @@ replace sample6 = 0 if tot_kwh > `r(p99)' & tot_kwh != 0
 gen byte evertreated = 0
 replace evertreated = 1 if tot_kwh > 0 & tot_kwh !=.
 
-keep prediction_error* qkw* evertreated any_post_treat ///
-	posttrain tot* cumul* upgr* cds_code block month year ///
+keep prediction_* qkw* evertreated any_post_treat ///
+	posttrain* splitting tot* cumul* upgr* cds_code block month year ///
 	month_of_sample sample*
 
 gsort evertreated posttrain
@@ -89,7 +89,8 @@ local bslist = ""
 forvalues bs = 1(1)20 {
 	local bslist = "`bslist' _bs`bs'"
 }
-foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
+* 0 1 2 3 4 7 8 9 10 `bslist'
+foreach pred in 9 {
 	di "`pred'"
 	** CREATE MONTHLY FILES AND APPEND
 	foreach subsample in 0 3 6 12 13 {
@@ -99,7 +100,7 @@ foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 		}
 		preserve
 		
-		keep prediction*_error`pred' qkw* evertreated any_post_treat posttrain tot* cumul* upgr* cds_code block month year month_of_sample sample*
+		keep prediction*`pred' qkw* evertreated any_post_treat posttrain* splitting tot* cumul* upgr* cds_code block month year month_of_sample sample*
 		
 		if (`subsample'==3 | `subsample'==12) {
 			gen byte sample3 = 0
@@ -121,10 +122,17 @@ foreach pred in 0 1 2 3 4 7 8 9 10 `bslist' {
 		
 		keep if sample`subsample'==1
 		keep if prediction_error`pred' != . & cumul_kwh != .
-	
+		
+		if ("`pred'"=="9") {
+			replace posttrain = posttrain_dl
+		}
+		else {
+			replace splitting = 1
+		}
+		
 		gen byte numobs = 1
 		gcollapse (mean) prediction*_error`pred' qkw* tot* cumul* upgr* ///
-			(sum) numobs, by(cds_code block month year month_of_sample any_post_treat posttrain)
+			(sum) numobs, by(cds_code block month year month_of_sample any_post_treat posttrain splitting)
 		rename prediction_error`pred' prediction_error
 
 		gen byte sample = `subsample'
