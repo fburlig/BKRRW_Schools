@@ -59,38 +59,25 @@ graph export "$dirpath_results_final/fig_ml_estimators_levels.pdf", replace
 {
 ** PREP DATA
 {
-local dataset = "_by_block"
 
 use "$dirpath_data_int/RESULTS_monthly_block.dta", clear
 replace spec = spec-1
 
-forvalues i = 1/8 {
-  replace ci95_lo_block`i' = beta_block`i' - 1.96 * se_block`i'
-  replace ci95_hi_block`i' = beta_block`i' + 1.96 * se_block`i'
-}
-
-
 drop if spec == .
 drop if beta_block1 == .
 
-keep beta_block* ci95_lo* ci95_hi* spec yvar
+keep beta_block*  spec yvar
 
-reshape long beta_block ci95_lo_block ci95_hi_block, i(yvar spec) j(block)
+reshape long beta_block , i(yvar spec) j(block)
 
 replace block = block - 1
-
-label define blocklab 0 "Average" 1 "Midn. to 3 AM" 2 "3 AM to 6 AM" 3 "6 AM to 9 AM" ///
-  4 "9 AM to Noon" 5 "Noon to 3 PM" 6 "3 PM to 6 PM" /// 
-  7 "6 PM to 9 PM" 8 "9 PM to Midn."
-  
-label values block blocklab   
-gen blockplus1 = block -0.1
 
 }
 
 ** MAKE FIGURES
 {
 forvalues s = 1/5 {
+
 twoway ///
   (line beta_block block if spec == `s' & yvar == "prediction_error1", lcolor(midblue*0.1) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "prediction_error1", mlcolor(midblue*0.1) mfcolor(white)  msymbol(O) msize(medium)) /// 
@@ -100,10 +87,12 @@ twoway ///
   (scatter beta_block block if spec == `s' & yvar == "prediction_error3", mlcolor(midblue*0.5) mfcolor(white)  msymbol(O) msize(medium)) /// 
   (line beta_block block if spec == `s' & yvar == "prediction_error4", lcolor(midblue*0.7) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if spec == `s' & yvar == "prediction_error4", mlcolor(midblue*0.7) mfcolor(white)  msymbol(O) msize(medium)) /// 
-  (line beta_block block if  spec == `s' & yvar == "prediction_error7", lcolor(midblue*1.2) lwidth(medthick) lpattern(solid)) ///
+  (line beta_block block if  spec == `s' & yvar == "prediction_error7", lcolor(midblue*0.9) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "prediction_error7", mlcolor(midblue*0.9) mfcolor(white)  msymbol(O) msize(medium)) /// 
-  (line beta_block block if spec == `s' & yvar == "prediction_error8", lcolor(midblue*1.4) lwidth(medthick) lpattern(solid)) ///
+  (line beta_block block if spec == `s' & yvar == "prediction_error8", lcolor(midblue*1.2) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "prediction_error8", mlcolor(midblue*1.2) mfcolor(white)  msymbol(O) msize(medium)) /// 
+  (line beta_block block if spec == `s' & yvar == "prediction_error10", lcolor(midblue*1.6) lwidth(medthick) lpattern(solid)) ///
+  (scatter beta_block block if  spec == `s' & yvar == "prediction_error10", mlcolor(midblue*1.6) mfcolor(white)  msymbol(O) msize(medium)) /// 
   (line beta_block block if spec == `s' & yvar == "qkw_hour", lcolor(gs7) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "qkw_hour", mlcolor(gs7) mfcolor(white)  msymbol(O) msize(medium) /// 
   text(5 -4 "`s'", color(black) size(huge))) , /// 
@@ -113,7 +102,6 @@ twoway ///
   legend(off) xlabel(0 4 8 12 16 20 24,  labsize(5)) xscale(range(0 23) noextend)
   graph export "$dirpath_results_final/Appendix/fig_blockwise_ml_levels_binary_mlalternatives_spec`s'.pdf", replace
 
- 
 }
 }
 }

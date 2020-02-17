@@ -2,6 +2,7 @@
 **** ANALYSIS: HOUR-OF-DAY-SPECIFIC ESTIMATES
 ************************************************
 
+clear all
 ** set up variables for regression outputs
 gen yvar = ""
 gen ylab = ""
@@ -22,11 +23,11 @@ gen r2 = .
 set obs 1000
 
 local row = 1
-foreach depvar in 0 1 2 3 4 5 6 7 8 {
+foreach depvar in 0 1 2 3 4 7 8 10 {
 foreach subsample in 0 {
 foreach postctrls in "" "post" {
   foreach blocks in any_post_treat {
-   foreach spec in c f i m h j {
+   foreach spec in f i m h j {
 	 {
 	 if (`depvar'==0 | `depvar'==9) & ("`postctrls'"=="post") {
 		continue
@@ -36,41 +37,41 @@ foreach postctrls in "" "post" {
 	 }
 	  if "`spec'" == "c" {
        local ctrls = ""
-       local fes = "cds_code#prediction block#prediction"
+       local fes = "cds_code#prediction block"
        local clstrs = "cds_code"
 	   replace spec = 1 in `row'
       }
       else if "`spec'" == "f" {
        local ctrls = ""
-       local fes = "cds_code#block#prediction"
+       local fes = "cds_code#block"
        local clstrs = "cds_code"
 	   replace spec = 2 in `row'
       }
       else if "`spec'" == "h" {
        local ctrls = ""
-       local fes = "cds_code#block#prediction month_of_sample#prediction"
+       local fes = "cds_code#block month_of_sample"
        local clstrs = "cds_code"
 	   replace spec = 5 in `row'
       }
       else if "`spec'" == "i" {
        local ctrls = ""
-       local fes = "cds_code#block#month#prediction"
+       local fes = "cds_code#block#month"
        local clstrs = "cds_code"
 	   replace spec = 3 in `row'
       }
       else if "`spec'" == "m" {
-	   local ctrls = "c.month_of_sample#prediction"
-	   local fes = "cds_code#block#month#prediction"
+	   local ctrls = "c.month_of_sample"
+	   local fes = "cds_code#block#month"
 	   local clstrs = "cds_code"
 	   replace spec = 4 in `row'
 	  }
 	  else if "`spec'" == "j" {
-       local fes = "cds_code#block#month#prediction month_of_sample#prediction"
+       local fes = "cds_code#block#month month_of_sample"
 	   replace spec = 6 in `row'
       } 
 	  local ifs = "if sample == `subsample'"
 	  if "`postctrls'" == "post" {
-	   local ctrls = "`ctrls' c.posttrain#prediction"
+	   local ctrls = "`ctrls' c.posttrain"
 	  } 
 	  }
 
@@ -79,7 +80,6 @@ foreach postctrls in "" "post" {
 		  preserve
 		  
 		  use "$dirpath_data_temp/monthly_by_block`depvar'_sample`subsample'.dta", clear
-		  
 		  
 		  qui reghdfe prediction_error block#c.`blocks' `ctrls' `ifs' [fw=numobs], absorb(`fes') tol(0.001) cluster(`clstrs')
 		  
