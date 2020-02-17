@@ -20,12 +20,12 @@ gen davis_denominator = .
 gen nobs = .
 gen nschools = .
 gen r2 = .
-set obs 2000
+set obs 200
 
 local row = 1
 foreach depvar in 9 {
 foreach subsample in 0 3 6 12 13 {
-foreach postctrls in "" "post" {
+foreach postctrls in "" {
   foreach blocks in any_post_treat {
    foreach spec in f i m h j {
 	 {
