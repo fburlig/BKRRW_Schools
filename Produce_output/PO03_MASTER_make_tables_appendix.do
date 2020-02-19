@@ -454,7 +454,7 @@ file close myfile
 
 }
 
-** Table 4: Machine learning results (bootstrap)
+** Table B.6: Machine learning results (bootstrap)
 {
 use "$dirpath_data_int/RESULTS_monthly_bootstrap.dta", clear
 keep if xvar =="davis binary" & postctrls == "post"
@@ -558,7 +558,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.6: Machine learning effects (average school specific estimates; outliers)
+** Table B.7: Machine learning effects (average school specific estimates; outliers)
 {
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
 
@@ -650,7 +650,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.7: Machine learning effects (alternative prediction methods)
+** Table B.8: Machine learning effects (alternative prediction methods)
 {
 
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
@@ -738,7 +738,110 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.8: Effects of bond measures on energy use in untreated schools
+** Table B.9: Machine learning results (double machine learning)
+{
+use"$dirpath_data_int/RESULTS_monthly_dl.dta", clear
+
+keep if subsample == "0" | subsample ==  "3" | subsample == "6" | subsample == "12"
+
+local nspec 5
+replace spec=spec-1
+
+capture file close myfile
+file open myfile using "$dirpath_results_final/tab_aggregate_predictions_dl.tex", write replace
+if "`standalone'" == "_standalone" {
+ file write myfile "\documentclass[12pt]{article}" _n
+ file write myfile "\usepackage{amsmath}" _n
+ file write myfile "\usepackage{tabularx}" _n
+ file write myfile "\usepackage{booktabs}" _n
+ file write myfile "\begin{document}" _n
+ file write myfile "\pagenumbering{gobble}" _n
+ file write myfile "\small"
+}	
+file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " c "
+}
+file write myfile "}" _n 
+file write myfile "\toprule " _n
+
+
+forvalues i = 1(1)`nspec' {
+	file write myfile " & (`i') "
+} 
+
+file write myfile " \\ \midrule " _n
+
+foreach s in "0" "3" "6" "12" {
+if "`s'" == "0" {
+  local panel = "\emph{Panel A: No trim}"
+}
+if "`s'" == "3" {
+  local panel = "\emph{Panel B: Trim outlier observations}"
+}
+else if "`s'" == "6" {
+  local panel = "\emph{Panel C: Trim outlier schools}"
+}
+else if "`s'" == "12" {
+  local panel = "\emph{Panel D: Trim observations and schools}"
+}
+
+file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
+file write myfile "\\" _n
+
+	file write myfile "\quad Realization rate " 
+	forvalues i = 1(1)`nspec' {
+		summ rate if spec == `i'& subsample == "`s'"
+		local rate = r(mean)
+		local rate = string(`rate',"%6.2f")
+		if (r(N) != 0) {
+			file write myfile " & `rate' "
+		}
+	}
+	file write myfile "\\ " _n
+
+file write myfile "\quad Point estimate" 
+
+forvalues i = 1(1)`nspec' { 
+	summ beta_aggregate if spec == `i'& subsample == "`s'"
+		local mean = string(r(mean),"%6.2f")
+	if (r(N) != 0) {
+		file write myfile " & `mean' "
+	}
+}		
+file write myfile "\\ " _n
+		forvalues i = 1(1)`nspec' {
+			summ se_aggregate if spec == `i'& subsample == "`s'"
+				local mean = string(r(mean),"%6.2f")
+			if (r(N) != 0) {
+				file write myfile " & (`mean') "
+			}
+		}
+file write myfile "\\ "_n
+	file write myfile "\quad Observations" 
+	forvalues i = 1(1)`nspec' {
+		summ nobs if spec == `i'& subsample == "`s'"
+		if (r(N) != 0) {
+			file write myfile " & " %10.0fc (r(mean)) " "
+		}
+	}
+	file write myfile "\\ " _n		
+	
+
+	file write myfile "\midrule " _n 
+}
+
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
+file write myfile "Time trend & No & No & Yes & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "\bottomrule " _n 
+file write myfile "\end{tabular*}" _n
+file close myfile
+}
+
+** Table B.10: Effects of bond measures on energy use in untreated schools
 {
 use "$dirpath_data_int/RESULTS_monthly_BONDS.dta", clear
 local nspec 5
@@ -802,7 +905,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.9: Panel fixed effects results (donuts -- davis)
+** Table B.11: Panel fixed effects results (donuts -- davis)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="davis binary" & yvar == "qkw_hour" & subsample== "0"
@@ -904,7 +1007,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.9: Panel fixed effects results (donuts -- reguant)
+** Table B.12: Panel fixed effects results (donuts -- reguant)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="savings binary" & yvar == "qkw_hour" & subsample== "0"
@@ -993,7 +1096,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.9: Machine learning effects results (donuts -- davis)
+** Table B.13: Machine learning effects results (donuts -- davis)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
@@ -1094,7 +1197,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.9: Machine learning effects results (donuts -- reguant)
+** Table B.14: Machine learning effects results (donuts -- reguant)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="savings binary" & yvar == "prediction_error4" & subsample== "0"
@@ -1181,7 +1284,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.10: Machine learning results (donuts)
+** Table B.XX: Machine learning results (donuts)
 {
 use "$dirpath_data_int/RESULTS_monthly_DONUTS.dta", clear
 keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
@@ -1302,7 +1405,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.11: Panel fixed effects results (continuous treatment variable)
+** Table B.15: Panel fixed effects results (continuous treatment variable)
 {
 use "$dirpath_data_int/RESULTS_monthly_wtemperature.dta", clear
 replace spec = 7 if spec == 6
@@ -1432,7 +1535,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.12: Machine learning results (continuous treatment variable)
+** Table B.16: Machine learning results (continuous treatment variable)
 {
 use "$dirpath_data_int/RESULTS_monthly.dta", clear
 keep if xvar =="davis continuous (counter)" & yvar == "prediction_error4" & subsample== "0"
@@ -1552,7 +1655,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.15: Panel fixed effects results (all hourly)
+** Table B.17: Panel fixed effects results (all hourly)
 {
 use "$dirpath_data_int/RESULTS_hourly_withtemp_wsavings.dta", clear
 replace spec = 7 if spec == 6
@@ -1684,7 +1787,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.16: Machine learning results (all hourly)
+** Table B.18: Machine learning results (all hourly)
 {
 use "$dirpath_data_int/RESULTS_hourly_NOtemp_wsavings.dta", clear
 keep if xvar =="davis binary" & yvar == "prediction_error4" & subsample== "0"
@@ -1804,7 +1907,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.22: Panel fixed effects (month collapse)
+** Table B.19: Panel fixed effects (month collapse)
 {
 use "$dirpath_data_int/RESULTS_additional_collapses.dta", clear
 
@@ -1916,7 +2019,7 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.24: Machine learning (month collapse)
+** Table B.20: Machine learning (month collapse)
 {
 use "$dirpath_data_int/RESULTS_additional_collapses.dta", clear
 
@@ -2028,105 +2131,3 @@ file write myfile "\end{tabular*}" _n
 file close myfile
 }
 
-** Table B.24: Machine learning results (double LASSO)
-{
-use"$dirpath_data_int/RESULTS_monthly_dl.dta", clear
-
-keep if subsample == "0" | subsample ==  "3" | subsample == "6" | subsample == "12"
-
-local nspec 5
-replace spec=spec-1
-
-capture file close myfile
-file open myfile using "$dirpath_results_final/tab_aggregate_predictions_dl.tex", write replace
-if "`standalone'" == "_standalone" {
- file write myfile "\documentclass[12pt]{article}" _n
- file write myfile "\usepackage{amsmath}" _n
- file write myfile "\usepackage{tabularx}" _n
- file write myfile "\usepackage{booktabs}" _n
- file write myfile "\begin{document}" _n
- file write myfile "\pagenumbering{gobble}" _n
- file write myfile "\small"
-}	
-file write myfile "\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l " _n
-
-forvalues i = 1(1)`nspec' {
-	file write myfile " c "
-}
-file write myfile "}" _n 
-file write myfile "\toprule " _n
-
-
-forvalues i = 1(1)`nspec' {
-	file write myfile " & (`i') "
-} 
-
-file write myfile " \\ \midrule " _n
-
-foreach s in "0" "3" "6" "12" {
-if "`s'" == "0" {
-  local panel = "\emph{Panel A: No trim}"
-}
-if "`s'" == "3" {
-  local panel = "\emph{Panel B: Trim outlier observations}"
-}
-else if "`s'" == "6" {
-  local panel = "\emph{Panel C: Trim outlier schools}"
-}
-else if "`s'" == "12" {
-  local panel = "\emph{Panel D: Trim observations and schools}"
-}
-
-file write myfile "\multicolumn{`nspec'}{l}{`panel'}"
-file write myfile "\\" _n
-
-	file write myfile "\quad Realization rate " 
-	forvalues i = 1(1)`nspec' {
-		summ rate if spec == `i'& subsample == "`s'"
-		local rate = r(mean)
-		local rate = string(`rate',"%6.2f")
-		if (r(N) != 0) {
-			file write myfile " & `rate' "
-		}
-	}
-	file write myfile "\\ " _n
-
-file write myfile "\quad Point estimate" 
-
-forvalues i = 1(1)`nspec' { 
-	summ beta_aggregate if spec == `i'& subsample == "`s'"
-		local mean = string(r(mean),"%6.2f")
-	if (r(N) != 0) {
-		file write myfile " & `mean' "
-	}
-}		
-file write myfile "\\ " _n
-		forvalues i = 1(1)`nspec' {
-			summ se_aggregate if spec == `i'& subsample == "`s'"
-				local mean = string(r(mean),"%6.2f")
-			if (r(N) != 0) {
-				file write myfile " & (`mean') "
-			}
-		}
-file write myfile "\\ "_n
-	file write myfile "\quad Observations" 
-	forvalues i = 1(1)`nspec' {
-		summ nobs if spec == `i'& subsample == "`s'"
-		if (r(N) != 0) {
-			file write myfile " & " %10.0fc (r(mean)) " "
-		}
-	}
-	file write myfile "\\ " _n		
-	
-
-	file write myfile "\midrule " _n 
-}
-
-file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
-file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
-file write myfile "Time trend & No & No & Yes & No & No  \\" _n
-file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
-file write myfile "\bottomrule " _n 
-file write myfile "\end{tabular*}" _n
-file close myfile
-}
