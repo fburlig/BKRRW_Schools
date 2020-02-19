@@ -98,6 +98,7 @@ keep if xvar =="savings binary" & yvar == "qkw_hour" & postctrls == ""
 
 keep if subsample == "3" | subsample == "6" | subsample == "12"
 
+replace spec = spec - 1
 local nspec 6
 
 capture file close myfile
