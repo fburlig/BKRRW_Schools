@@ -2082,11 +2082,9 @@ file write myfile "\\" _n
 
 	file write myfile "\quad Realization rate " 
 	forvalues i = 1(1)`nspec' {
-		summ beta_aggregate if spec == `i' & subsample == "`s'"
-		local beta = r(mean)
-		summ davis_denominator if spec == `i'& subsample == "`s'"
-		local savings = r(mean)
-		local rate = string(`beta'/`savings',"%6.2f")
+		summ rate if spec == `i'& subsample == "`s'"
+		local rate = r(mean)
+		local rate = string(`rate',"%6.2f")
 		if (r(N) != 0) {
 			file write myfile " & `rate' "
 		}
