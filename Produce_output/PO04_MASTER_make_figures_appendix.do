@@ -61,6 +61,7 @@ graph export "$dirpath_results_final/fig_ml_estimators_levels.pdf", replace
 {
 
 use "$dirpath_data_int/RESULTS_monthly_block.dta", clear
+append using "$dirpath_data_int/RESULTS_monthly_hourly_dl.dta"
 replace spec = spec-1
 
 drop if spec == .
@@ -91,8 +92,10 @@ twoway ///
   (scatter beta_block block if  spec == `s' & yvar == "prediction_error7", mlcolor(midblue*0.9) mfcolor(white)  msymbol(O) msize(medium)) /// 
   (line beta_block block if spec == `s' & yvar == "prediction_error8", lcolor(midblue*1.2) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "prediction_error8", mlcolor(midblue*1.2) mfcolor(white)  msymbol(O) msize(medium)) /// 
-  (line beta_block block if spec == `s' & yvar == "prediction_error10", lcolor(midblue*1.6) lwidth(medthick) lpattern(solid)) ///
-  (scatter beta_block block if  spec == `s' & yvar == "prediction_error10", mlcolor(midblue*1.6) mfcolor(white)  msymbol(O) msize(medium)) /// 
+  (line beta_block block if spec == `s' & yvar == "prediction_error9", lcolor(midblue*1.4) lwidth(medthick) lpattern(solid)) ///
+  (scatter beta_block block if  spec == `s' & yvar == "prediction_error9", mlcolor(midblue*1.4) mfcolor(white)  msymbol(O) msize(medium)) /// 
+  (line beta_block block if spec == `s' & yvar == "prediction_error10", lcolor(midblue*1.8) lwidth(medthick) lpattern(solid)) ///
+  (scatter beta_block block if  spec == `s' & yvar == "prediction_error10", mlcolor(midblue*1.8) mfcolor(white)  msymbol(O) msize(medium)) /// 
   (line beta_block block if spec == `s' & yvar == "qkw_hour", lcolor(gs7) lwidth(medthick) lpattern(solid)) ///
   (scatter beta_block block if  spec == `s' & yvar == "qkw_hour", mlcolor(gs7) mfcolor(white)  msymbol(O) msize(medium) /// 
   text(5 -4 "`s'", color(black) size(huge))) , /// 
@@ -102,6 +105,30 @@ twoway ///
   legend(off) xlabel(0 4 8 12 16 20 24,  labsize(5)) xscale(range(0 23) noextend)
   graph export "$dirpath_results_final/Appendix/fig_blockwise_ml_levels_binary_mlalternatives_spec`s'.pdf", replace
 
+  
+  
+twoway (line beta_block spec if spec == ., lcolor(midblue*0.1) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*0.3) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*0.5) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*0.7) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*0.9) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*1.2) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*1.4) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(midblue*1.8) lpattern(solid) lwidth(medthick)), ///
+   scheme(fb) xscale(off) yscale(off)  ///
+  legend(order(1 "LASSO, Basic only, Min" 2 "LASSO, Basic only, 1SE" ///
+  3 "LASSO, Basic + Schools, Min" 4 "LASSO, Basic + Schools, 1 SE" ///
+  5 "Random Forest, Block-specific" 6 "Random Forest, Pooled" ///
+  7 "Double machine learning" 8 "Averaged") position(6) rows(4) symxsize(10))  
+graph export "$dirpath_results_final/fig_legend_ml.pdf", replace
+
+  
+  twoway (line beta_block spec if spec == ., lcolor(gs7) lpattern(solid) lwidth(medthick)) ///
+       (line beta_block spec if spec == ., lcolor(gs7) lpattern(solid) lwidth(medthick)), ///
+   scheme(fb) xscale(off) yscale(off)  ///
+  legend(order(1 "Panel FE") position(6) rows(1) symxsize(10))  
+graph export "$dirpath_results_final/fig_legend_pfe.pdf", replace
+  
 }
 }
 }
