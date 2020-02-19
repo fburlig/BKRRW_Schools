@@ -33,28 +33,28 @@ foreach postctrls in "" {
 	 local ctrls = ""
 	 local clstrs = "cds_code"
 	  if "`spec'" == "c" {
-       local fes = "cds_code block"
+       local fes = "school_id block"
 	   replace spec = 1 in `row'
       }
       else if "`spec'" == "f" {
-       local fes = "cds_code#block"
+       local fes = "school_id#block"
 	   replace spec = 2 in `row'
       }
       else if "`spec'" == "h" {
-       local fes = "cds_code#block month_of_sample"
+       local fes = "school_id#block month_of_sample"
 	   replace spec = 5 in `row'   
       }
       else if "`spec'" == "i" {
-       local fes = "cds_code#block#month"
+       local fes = "school_id#block#month"
 	   replace spec = 3 in `row'
       }
 	  else if "`spec'" == "j" {
-       local fes = "cds_code#block#month month_of_sample"
+       local fes = "school_id#block#month month_of_sample"
 	   replace spec = 6 in `row'
       } 
       else if "`spec'" == "m" {
 	   local ctrls = "c.month_of_sample"
-	   local fes = "cds_code#block#month"
+	   local fes = "school_id#block#month"
 	   replace spec = 4 in `row'
 	  }
 	  if "`postctrls'" == "post" {
@@ -70,6 +70,7 @@ foreach postctrls in "" {
 		  
 		  * use partialled out dummy
 		  gegen evertreated = max(any_post_treat), by(cds_code)
+		  gegen school_id = group(cds_code splitting)
 		  
 		  * Davis estimator
 		  replace cumul_kwh = - cumul_kwh / (24*365)
