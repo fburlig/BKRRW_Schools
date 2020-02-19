@@ -566,7 +566,8 @@ keep if xvar =="savings binary" & yvar == "prediction_error4" & postctrls == ""
 
 keep if subsample == "3" | subsample == "6" | subsample == "12"
 
-local nspec 6
+replace spec = spec - 1
+local nspec 5
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_predictions_binary_reguant_samples.tex", write replace
