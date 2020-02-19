@@ -175,27 +175,58 @@ local slope_sav = round(_b[savings],.01)
 
 twoway (scatter  `beta_pick' savings, mcolor(gs10))  ///
 		(pci 41 40 41 40, lcolor(gs12) lwidth(thin) ///
-		text(48 46 "Slope:", size(7)) text(38 46 "0`slope_sav'", size(7)) text(75 -8.5 "A", size(vhuge))) ///	
+		text(48 46 "Slope:", size(7)) text(38 46 "0`slope_sav'", size(7)) text(75 -15 "A", size(vhuge))) ///	
         (lfit `beta_pick' savings  , lcolor(midblue) lstyle(solid) lwidth(medthick))  ///	
 		if `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta' & savings < `u_thr_sav' & savings > `l_thr_sav', graphregion(color(white))  ///
-		legend(off) scheme(fb) xtitle("Expected savings (kWh)", size(7)) ytitle("Estimated savings (kWh)", size(7)) ///
+		legend(off) scheme(fb) xtitle("Expected savings (kWh)", size(6.5)) ///
+		ytitle("Estimated savings (kWh)", size(6.5)) ///
 		yscale(range(-75 75) noextend) xscale(noextend) ylab(-75 -50 -25 0 25 50 75, labsize(7)) xlab(, labsize(7)) yline(0, lcolor(gs7) lwidth(thin)) ///
 		saving("$dirpath_results_prelim/heterogeneous_betas_lfit_dl_text.gph", replace)
 
 		
 twoway (kdensity `beta_pick' if savings==0 & `beta_pick' < `u_thr_beta0' & `beta_pick' > `l_thr_beta0', horizontal lcolor(gs12) lstyle(solid) lwidth(medium)) ///
 	(kdensity `beta_pick'  if savings > 0  & `beta_pick' < `u_thr_beta' & `beta_pick' > `l_thr_beta', horizontal lcolor(midblue) lstyle(solid) lwidth(medium) ///
-	text(75 -0.04 "B", size(vhuge))) ///
+	text(75 -0.05 "B", size(vhuge))) ///
 	, scheme(fb) legend(off) ytitle("") xtitle("Density", color(white)) ///
 	xla(,tlength(0) labcolor(white) labsize(7)) xscale(lcolor(white)) ///
 	yscale(range(-75 75) noextend) ylab(-75 -50 -25 0 25 50 75, labsize(7)) ///
 	 yline(0, lcolor(gs7) lwidth(thin)) ///
 		saving("$dirpath_results_prelim/heterogeneous_betas_distribution_dl.gph", replace)
 
+use "$dirpath_data_int/RESULTS_schools_effects_dl.dta", clear
+merge 1:1 cds_code using "$dirpath_data_int/school_specific_slopes_flagged_robust.dta", keep(3) nogen
+
+gen deg_45 = _n - 101
+replace deg_45 = . if deg_45 < -100
+replace deg_45 = . if deg_45 > 100
+
+twoway ///
+       (line deg deg, lcolor(gs12) lpattern(solid)) ///
+       (scatter ebayes theta, mlcolor(midblue) mfcolor(none) ///
+	   	text(100 -185 "C", size(vhuge))), ///
+        yscale(range(-100 100) noextend) xscale(range(-100 100) noextend) ///
+		ylab(-100 -50 0 50 100, labsize(7)) xlab(-100 -50 0 50 100, labsize(7)) ///
+		ytitle("Empirical Bayes (kWh)      ", size(6.5)) ///
+		xtitle("Double machine learning (kWh)      ", size(6.5))  ///
+		legend(off) ///
+			saving("$dirpath_results_prelim/eb_vs_dml_scatter.gph", replace)
+			
+twoway ///
+       (line deg deg, lcolor(gs12) lpattern(solid)) ///
+       (scatter ebayes theta, mlcolor(midblue) mfcolor(none)), ///
+        yscale(range(-100 100) noextend) xscale(range(-100 100) noextend) ///
+		ylab(-100 -50 0 50 100, labsize(5.5)) xlab(-100 -50 0 50 100, labsize(5.5)) ///
+		ytitle("Empirical Bayes (kWh)", size(5.5)) ///
+		xtitle("Double machine learning (kWh)", size(5.5))  ///
+		legend(off) 
+graph export "$dirpath_results_final/eb_vs_dml_referee.pdf", replace as(pdf)
+		
 ** graph combine
-graph combine "$dirpath_results_prelim/heterogeneous_betas_lfit_dl_text.gph" "$dirpath_results_prelim/heterogeneous_betas_distribution_dl.gph", ///
+graph combine "$dirpath_results_prelim/heterogeneous_betas_lfit_dl_text.gph" /// 
+        "$dirpath_results_prelim/heterogeneous_betas_distribution_dl.gph" ///
+		"$dirpath_results_prelim/eb_vs_dml_scatter.gph", ///
        rows(1)    ///
 	   scheme(fb) ysize(4) xsize(10) ///
-      saving(heterogeneous_betas_eb_combo, replace)
+      saving(heterogeneous_betas_eb_combo_dl, replace)
 graph export "$dirpath_results_final/fig_school_specific_DL.pdf", replace as(pdf)
 }
