@@ -365,10 +365,10 @@ file write myfile "90th percentile  "
 	
 	file write myfile "\midrule " _n 
 
-file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF & DL & AVG\\" _n
-file write myfile "Hour-specific model & X & X & X & X & X &  & X & \\" _n
-file write myfile "Untreated schools $-i$  & &  & X & X &  &  & X\\" _n
-file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  &  & 1SE  \\" _n
+file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF & DML & AVG\\" _n
+file write myfile "Hour-specific model & X & X & X & X & X &  & & \\" _n
+file write myfile "Untreated schools $-i$  & &  & X & X &  &  \\" _n
+file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  &    \\" _n
 
 file write myfile "\bottomrule " _n 
 file write myfile "\end{tabular*}" _n
@@ -707,11 +707,9 @@ foreach i in `predtypes' {
 	
 	file write myfile "Realization rate " 
 foreach i in `predtypes' {
-		summ beta_aggregate if yvar == "prediction_error`i'"
-		local beta = r(mean)
-		summ davis_denominator if yvar == "prediction_error`i'"
-		local savings = r(mean)
-		local rate = string(`beta'/`savings',"%6.2f")
+		summ rate if yvar == "prediction_error`i'"
+		local rate = r(mean)
+		local rate = string(`rate',"%6.2f")
 		if (r(N) != 0) {
 			file write myfile " & `rate' "
 		}
@@ -730,10 +728,10 @@ foreach i in `predtypes' {
 	file write myfile "\\ " _n		
 	file write myfile "\midrule " _n 
 
-file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF & DL & AVG \\" _n
-file write myfile "Hour-specific model & X & X & X & X &  X &  &  &  X \\" _n
-file write myfile "Untreated schools $-i$  & &  & X & X &  &  & X \\" _n
-file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  &  & 1SE \\" _n
+file write myfile "Method & LASSO & LASSO & LASSO & LASSO & RF & RF & DML & AVG \\" _n
+file write myfile "Hour-specific model & X & X & X & X &  X &  &  &   \\" _n
+file write myfile "Untreated schools $-i$  & &  & X & X &  &  &  \\" _n
+file write myfile "Tuning parameter & Min & 1SE & Min & 1SE &  &  &  \\" _n
 file write myfile "\bottomrule " _n 
 file write myfile "\end{tabular*}" _n
 file close myfile
