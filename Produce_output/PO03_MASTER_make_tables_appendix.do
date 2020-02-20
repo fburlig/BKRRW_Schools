@@ -1428,13 +1428,14 @@ replace xvar = "savings continuous" if xvar == "" & davis_denominator == .
 keep if xvar == "savings continuous" & yvar == "qkw_hour" & subsample == "0"
 append using  "$dirpath_data_int/RESULTS_monthly.dta"
 keep if xvar =="savings continuous" & yvar == "qkw_hour" & subsample== "0"
-local nspec 5
 replace spec = spec-1
 gen estimator = "reguant"
 
 append using "`davis'"
 
 drop if postctrls == "post"
+
+local nspec 6
 
 capture file close myfile
 file open myfile using "$dirpath_results_final/tab_aggregate_regressions_continuous_davis_reguant.tex", write replace
