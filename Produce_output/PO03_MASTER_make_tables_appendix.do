@@ -1528,10 +1528,11 @@ file write myfile "\\ "_n
 	file write myfile "\midrule " _n 
 }
 
-file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes  \\" _n
-file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  \\" _n
-file write myfile "Time trend & No & No & Yes & No & No  \\" _n
-file write myfile "Month of Sample FE & No & No & No & Yes & Yes \\" _n
+file write myfile "School-Hour FE       & Yes & Yes & Yes & Yes & Yes & Yes \\" _n
+file write myfile "School-Hour-Month FE & No & Yes & Yes & No & Yes  & Yes \\" _n
+file write myfile "Time trend & No & No & Yes & No & No & No  \\" _n
+file write myfile "Month of Sample FE & No & No & No & Yes & Yes & Yes \\" _n
+file write myfile "Temp Ctrl & No & No & No & No & No & Yes \\" _n
 file write myfile "\bottomrule " _n 
 file write myfile "\end{tabular*}" _n
 file close myfile
