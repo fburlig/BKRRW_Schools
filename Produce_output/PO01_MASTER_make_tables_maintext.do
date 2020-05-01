@@ -746,7 +746,7 @@ forvalues i = 1(1)`nspec' {
 }
 file write myfile " \\ \midrule " _n
 
-foreach var in "cons" "hvac_dummy" "light_dummy" "hvac_light" "coastal" "cde_lon" "cde_lat" "temp_f" "enr_total" "API_BASE" "poverty_rate" "tot_kwh" "hvaccoastal"{
+foreach var in "cons" "hvac_dummy" "light_dummy" "hvac_light" "coastal" "cde_lon" "cde_lat" "temp_f" "enr_total" "API_BASE" "poverty_rate" /* "tot_kwh" "hvaccoastal" */ {
 file write myfile "`label_b_`var''"  
 forvalues i = 1(1)`nspec' {
   summ b_`var' if spec == `i'
