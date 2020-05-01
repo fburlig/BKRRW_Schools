@@ -706,7 +706,7 @@ file close myfile
 {
 
 use "$dirpath_data_int/MONTHLY_heterogeneity_by_characteristics_eb.dta", clear
-local nspec = 7
+local nspec = 5
 
 local label_b_cons "Constant"
 local label_b_hvac_dummy "HVAC only (0/1)"

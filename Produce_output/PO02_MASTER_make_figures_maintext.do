@@ -8,6 +8,7 @@
 }
 ** Figure 2: Energy efficiency upgrades
 {
+{
 use "$dirpath_data_int/ee_clean_elec_noclusters.dta", clear
 
 gen counter = 1
@@ -86,6 +87,82 @@ graph twoway (bar adj2 back, horizontal barwidth(0.8) fcolor(gs10) lcolor(gs10) 
 graph export "$dirpath_results_final/fig_eestats_B.pdf", replace
 }
 
+{
+** Merge electricity data with school EE data
+use "$dirpath_data_temp/ee_build_dataset_appended_AUGUST_nov5.dta", clear
+append using "$dirpath_data_temp/ee_build_dataset_appended_AUGUST_OLDDATA.dta"
+duplicates drop
+* merge in the school identifiers
+merge m:1 sp_id using "$dirpath_data_int/pge_lea_meter_crosswalk_oct2016.dta"
+* only keep upgrades that merged (there are lots of 1's because
+  * this dataset of ee upgrades comes from 3 PG&E data pulls
+tab _merge
+keep if _merge == 3
+drop _merge
+unique cds_code
+
+gen per_unit = adj_gross_kwh / units
+
+gen counter = 1
+keep measure_code technology_fam technology product_name project_life per_unit counter upgrade_tech_fam
+
+collapse (sum) counter, by(measure_code technology_fam technology product_name upgrade_tech_fam project_life per_unit)
+
+drop if upgrade_tech_fam == 11
+
+decode upgrade_tech_fam, gen(utf)
+
+gen rank = .
+replace rank = 1 if utf == "BUILDING ENVELOPE"
+replace rank = 2 if utf == "MOTORS, PUMPS, FANS"
+replace rank = 3 if utf == "BOILERS AND STEAM SYSTEMS"
+replace rank = 4 if utf == "FOOD SERVICE TECHNOLOGY"
+replace rank = 5 if utf == "REFRIGERATION"
+replace rank = 6 if utf == "APPLIANCES"
+replace rank = 7 if utf == "CROSS PORTFOLIO"
+replace rank = 8 if utf == "ELECTRONICS AND IT"
+replace rank = 9 if utf == "HVAC"
+replace rank = 10 if utf == "LIGHTING"
+
+la define ranklab 1 "Building envelope" 2 "Motors" 3 "Boilers" ///
+     4 "Food service" 5 "Refrigeration" 6 "Appliances" 7 "Cross portfolio" ///
+	 8 "Electronics" 9 "HVAC" 10 "Lighting"
+	 
+la values rank ranklab
+
+graph hbox per_unit [fweight = counter], over(rank)  noout ///
+ ylab(,nogrid) ytitle("Expected savings (kWh)") subtitle("") note(" ")  ///
+ box(1 ,fcolor(gs10) lcolor(gs10)) ///
+ text(-1500 105 "C", size(huge))
+
+graph export "$dirpath_results_final/fig_eestats_C.pdf", replace
+}
+
+
+******* FIGURE: EXPECTED SAVINGS RELATIVE TO CONSUMPTION
+{
+use "$dirpath_data_temp/monthly_by_block4_sample0.dta", clear
+keep cds_code
+duplicates drop
+merge 1:1 cds_code using "$dirpath_data_int/data_for_selection_table.dta", keep(3)
+keep if _treatmerge == 3
+merge 1:1 cds_code using "$dirpath_data_int/ee_total_formerge.dta", keep(1 3) nogen
+merge 1:1 cds_code using "$dirpath_data_temp/mean_energy_use.dta", keep(3) nogen
+merge 1:1 cds_code using "$dirpath_data_temp/cds_coastal.dta", keep(1 3) nogen
+
+gen proj_sav_pct = tot_kwh/(mean_energy_use*24*365)
+
+twoway (hist proj_sav_pct, fc(gs12) lc(gs13) lw(thin) freq ///
+ text(400 -0.15 "D", size(huge)))  ///
+ if proj_sav_pct != 0 & proj_sav_pct != . & proj_sav_pct < 1 , ///
+	 legend(off) ///
+	 xscale(range(0 1)) xlab(0(0.2)1) ///
+	scheme(fb) ytitle("Number of schools") xtitle("Expected savings as a share of average electricity consumption")	
+	
+graph export "$dirpath_results_final/fig_eestats_D.pdf", as(pdf) replace
+
+}
+}
 ** Figure 3: School characteristics before and after treatment
 {
 ** PREP DATA
