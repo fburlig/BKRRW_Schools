@@ -31,8 +31,7 @@ MAIN PROJECT FOLDER
 |       |--  PGE_Oct_2016
 |   |-- Temp
 |-- Results
-|   |-- Final
-|       |-- Appendix
+|   |-- Appendix
 ```
 
 The full project data folder structure is available at the _JAERE_ website (we will update this Readme with a link when the data are available online), including the fully-populated `Other data` folder. All other folders are empty, per our NDA with PG&E. In order to run the code described below, researchers will need to acquire the following datasets, and place them according to the below filepaths:
@@ -53,9 +52,9 @@ Upon obtaining data from PG&E, and populating as per the above file structure, r
 
 2) `BKRRW_Schools/Build/B00_MASTER_build_all.do` runs all code to build datasets in `Stata`. Note that some portions of this build are run in `R`. Researchers will have to run the 4 `.R` files in the `BKRRW_Schools/Build` folder at the appropriate time partway through the `BOO_MASTER_build_all.do` file. This code takes large amounts of memory and is quite slow (ie, may take several days to run), due to the use of interval electricity metering data.
 
-3) `BKRRW_Schools/Analyze/A00_MASTER_analysis_all.do` runs all analysis code in Stata. 
+3) `BKRRW_Schools/Analyze/A00_MASTER_analyze_all.do` runs all analysis code in Stata. 
 
-4) `BKRRW_Schools/PO00_MASTER_produce_output_all.do` generates all tables (in LaTeX format) and figures (in PDF format) in Stata for both the main text and the appendix. Appendix Figure C.1: "Locations of untreated and treated schools" must be built in `R` using the file `jan4_map_tc.R`.
+4) `BKRRW_Schools/produce_output/PO00_MASTER_produce_output_all.do` generates all tables (in LaTeX format) and figures (in PDF format) in Stata for both the main text and the appendix. Appendix Figure C.1: "Locations of untreated and treated schools" must be built in `R` using the file `PO05_MASTER_make_map.R`.
 
 The `BKRRW_Schools/Build`, `BKRRW_Schools/Analyze`, and `BKRRW_Schools/Produce_output` folders contain all required sub-programs. 
 
