@@ -6,7 +6,7 @@ This repository contains the code required to replicate Burlig, Knittel, Rapson,
 Due to a non-disclosure agreement between UC Berkeley and Pacific Gas and Electric (PG&E), we are unable to release the electricity data for this project publicly. Academic researchers wishing to replicate our results can submit a request through the [Energy Data Request Program](https://pge-energydatarequest.com/). 
 
 The file structure for this project is as follows:
-
+```
 MAIN PROJECT FOLDER
 |-- Code
 |   |-- Analyze
@@ -33,7 +33,7 @@ MAIN PROJECT FOLDER
 |-- Results
 |   |-- Final
 |       |-- Appendix
-
+```
 
 The full project data folder structure is available at the _JAERE_ website, including the fully-populated `Other data` folder. All other folders are empty, per our NDA with PG&E. In order to run the code described below, researchers will need to acquire the following datasets, and place them according to the below filepaths:
  - Meter lat/longs (gas and electric): `[MASTER PROJECT FOLDER]/Data/Raw/`
