@@ -19,6 +19,7 @@ global dirpath_code "T:/Home/Fiona/backup/BKRRW_Schools.git"
 ** Code paths
 global dirpath_code_build "$dirpath_code/Build"
 global dirpath_code_analyze "$dirpath_code/Analyze"
+global dirpath_code_output "$dirpath_code/Produce_output"
 
 ** Data paths
 global dirpath_data "$dirpath/Data"

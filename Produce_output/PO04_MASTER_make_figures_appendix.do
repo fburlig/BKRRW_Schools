@@ -2,7 +2,41 @@
 **** PRODUCE OUTPUT: MAKE APPENDIX FIGURES
 ************************************************
 
-** Figure A.1: Comparing machine learning estimators
+
+** Figure A.1: Machine learning approach -- graphical intuition
+{
+** PREP DATA
+{
+
+clear
+set obs 1000
+set seed 12345
+
+gen y = 0.5*cos(0.05*_n) + 0.1*rnormal() + 30 
+gen time = _n
+
+gen ypred = y + 0.1*rnormal() 
+
+gen ytreatment = y
+replace ytreatment = y - 0.75 if time > 500
+}
+
+** MAKE FIGURE
+{
+
+twoway ///
+       (scatter ytreatment time, mcolor(gs13) msize(vsmall)) ///
+       (line ypred time if time <= 500, lcolor(midblue*0.5) lpattern(solid) lwidth(thin)) ///
+       (line ypred time if time > 500, lcolor(midblue) lpattern(solid) lwidth(thin)) ///
+	   , ///
+ xtitle("Time") ytitle("Energy consumption (kWh)") yscale(range(28 31)) ylab(28(1)31) /// 
+ legend(position(6) rows(1) order(2 "In-sample prediction" 3 "Out-of-sample prediction" 1 "Data" ) region(lcolor(white)))
+ 
+ graph export "$dirpath_results_final/Appendix/fake_ml_intuition_paper.pdf", replace
+}
+}
+
+** Figure A.2: Comparing machine learning estimators
 {
 use "$dirpath_data_int/RESULTS_ml_estimators_levels_samples.dta", clear
 
@@ -52,10 +86,15 @@ twoway (rspike ci95_lo_aggregate ci95_hi_aggregate order, lcolor(gs10) lwidth(th
   ytitle("Prediction error (kWh)") xtitle("") ///
   legend(off) xscale(off) xlabel(1(1)6, valuelabel)
   
-graph export "$dirpath_results_final/fig_ml_estimators_levels.pdf", replace
+graph export "$dirpath_results_final/Appendix/fig_ml_estimators_levels.pdf", replace
 }
 
-** Figure B.1: Machine learning results by hour (alternative prediction methods)
+** Figure C.1: Locations of untreated and treated schools
+{
+*THIS FIGURE IS BUILT IN R: "$dirpath_code_produceoutput/PO05_MASTER_make_map.R"
+}
+
+** Figure C.2: Machine learning results by hour (alternative prediction methods)
 {
 ** PREP DATA
 {
@@ -120,20 +159,22 @@ twoway (line beta_block spec if spec == ., lcolor(midblue*0.1) lpattern(solid) l
   3 "LASSO, Basic + Schools, Min" 4 "LASSO, Basic + Schools, 1 SE" ///
   5 "Random Forest, Block-specific" 6 "Random Forest, Pooled" ///
   7 "Double machine learning" 8 "Averaged") position(6) rows(4) symxsize(10))  
-graph export "$dirpath_results_final/fig_legend_ml.pdf", replace
+graph export "$dirpath_results_final/Appendix/fig_legend_ml.pdf", replace
 
   
   twoway (line beta_block spec if spec == ., lcolor(gs7) lpattern(solid) lwidth(medthick)) ///
        (line beta_block spec if spec == ., lcolor(gs7) lpattern(solid) lwidth(medthick)), ///
    scheme(fb) xscale(off) yscale(off)  ///
   legend(order(1 "Panel FE") position(6) rows(1) symxsize(10))  
-graph export "$dirpath_results_final/fig_legend_pfe.pdf", replace
+graph export "$dirpath_results_final/Appendix/fig_legend_pfe.pdf", replace
+  
+// NOTE: The legend in this figure is attached separately in Photoshop.  
   
 }
 }
 }
 
-** Figure B.2: School-specific effects from double machine learning
+** Figure C.3: School-specific effects from double machine learning
 {
 use "$dirpath_data_int/RESULTS_schools_effects_dl.dta", clear
 
@@ -210,16 +251,6 @@ twoway ///
 		xtitle("Double machine learning (kWh)      ", size(6.5))  ///
 		legend(off) ///
 			saving("$dirpath_results_prelim/eb_vs_dml_scatter.gph", replace)
-			
-twoway ///
-       (line deg deg, lcolor(gs12) lpattern(solid)) ///
-       (scatter ebayes theta, mlcolor(midblue) mfcolor(none)), ///
-        yscale(range(-100 100) noextend) xscale(range(-100 100) noextend) ///
-		ylab(-100 -50 0 50 100, labsize(5.5)) xlab(-100 -50 0 50 100, labsize(5.5)) ///
-		ytitle("Empirical Bayes (kWh)", size(5.5)) ///
-		xtitle("Double machine learning (kWh)", size(5.5))  ///
-		legend(off) 
-graph export "$dirpath_results_final/eb_vs_dml_referee.pdf", replace as(pdf)
 		
 ** graph combine
 graph combine "$dirpath_results_prelim/heterogeneous_betas_lfit_dl_text.gph" /// 
@@ -228,5 +259,5 @@ graph combine "$dirpath_results_prelim/heterogeneous_betas_lfit_dl_text.gph" ///
        rows(1)    ///
 	   scheme(fb) ysize(4) xsize(10) ///
       saving(heterogeneous_betas_eb_combo_dl, replace)
-graph export "$dirpath_results_final/fig_school_specific_DL.pdf", replace as(pdf)
+graph export "$dirpath_results_final/Appendix/fig_school_specific_DL.pdf", replace as(pdf)
 }

@@ -2,11 +2,7 @@
 **** PRODUCE OUTPUT: MAKE MAIN TEXT FIGURES
 ************************************************
 
-** Figure 1: Locations of untreated and treated schools
-{
-*THIS FIGURE IS BUILT IN R: "$dirpath_code_produceoutput/jan4_map_tc.R"
-}
-** Figure 2: Energy efficiency upgrades
+** Figure 1: Energy efficiency upgrades
 {
 {
 use "$dirpath_data_int/ee_clean_elec_noclusters.dta", clear
@@ -163,7 +159,8 @@ graph export "$dirpath_results_final/fig_eestats_D.pdf", as(pdf) replace
 
 }
 }
-** Figure 3: School characteristics before and after treatment
+
+** Figure 2: School characteristics before and after treatment
 {
 ** PREP DATA
 {
@@ -344,40 +341,7 @@ graph export "$dirpath_results_final/Appendix/fig_eventstudy_allspecs_dd_levels_
 
 }
 
-** Figure 4: Machine learning approach -- graphical intuition
-{
-** PREP DATA
-{
-
-clear
-set obs 1000
-set seed 12345
-
-gen y = 0.5*cos(0.05*_n) + 0.1*rnormal() + 30 
-gen time = _n
-
-gen ypred = y + 0.1*rnormal() 
-
-gen ytreatment = y
-replace ytreatment = y - 0.75 if time > 500
-}
-
-** MAKE FIGURE
-{
-
-twoway ///
-       (scatter ytreatment time, mcolor(gs13) msize(vsmall)) ///
-       (line ypred time if time <= 500, lcolor(midblue*0.5) lpattern(solid) lwidth(thin)) ///
-       (line ypred time if time > 500, lcolor(midblue) lpattern(solid) lwidth(thin)) ///
-	   , ///
- xtitle("Time") ytitle("Energy consumption (kWh)") yscale(range(28 31)) ylab(28(1)31) /// 
- legend(position(6) rows(1) order(2 "In-sample prediction" 3 "Out-of-sample prediction" 1 "Data" ) region(lcolor(white)))
- 
- graph export "$dirpath_results_final/fake_ml_intuition_paper.pdf", replace
-}
-}
-
-** Figure 5: Machine learning diagnostics
+** Figure 3: Machine learning diagnostics
 {
 {
 ** PANEL A
@@ -616,7 +580,7 @@ graph export "$dirpath_results_final/fig_ml_diagnostics_d.pdf", replace
 
 }
 
-** Figure 6: Comparison of methods across specifications and samples
+** Figure 4: Comparison of methods across specifications and samples
 {
 ** PREP DATA
 {
@@ -649,7 +613,7 @@ graph export "$dirpath_results_final/fig_kdensities_rate_monthlyt.pdf", replace
 
 }
 
-** Figure 7: School-specific effects
+** Figure 5: School-specific effects
 {
 use "$dirpath_data_int/school_specific_slopes_flagged_robust.dta", clear
 
