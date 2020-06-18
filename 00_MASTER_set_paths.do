@@ -13,8 +13,8 @@ set seed 12345
 global sample 0
 
 ** CHANGE TO YOUR DIRECTORY PATH
-global dirpath "T:/Projects/Schools"
-global dirpath_code "T:/Home/Fiona/backup/BKRRW_Schools.git"
+global dirpath "[YOUR DATA FOLDER FILE PATH HERE]"
+global dirpath_code "[YOUR CODE FOLDER PATH HERE]/BKRRW_Schools.git"
 
 ** Code paths
 global dirpath_code_build "$dirpath_code/Build"
