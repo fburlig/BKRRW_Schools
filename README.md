@@ -2,37 +2,37 @@
 This repository contains the code required to replicate Burlig, Knittel, Rapson, Reguant, and Wolfram (2020): "Machine learning from schools about energy efficiency."
 
 
-### Data
+### Required data and file structure
 Due to a non-disclosure agreement between UC Berkeley and Pacific Gas and Electric (PG&E), we are unable to release the electricity data for this project publicly. Academic researchers wishing to replicate our results can submit a request through the [Energy Data Request Program](https://pge-energydatarequest.com/). 
 
 The file structure for this project is as follows:
 
 MAIN PROJECT FOLDER
-??? Code
-?   ??? Analyze
-?   ??? Build
-?   ??? Produce_output
-??? Data
-?   ??? Intermediate
-?       ???  School specific
-?                    ??? forest
-?                    ??? double lasso
-?                    ??? prediction
-?       ???  Matching
-?   ??? Other data
-?       ???  CA school info
-?       ???  SunriseSunsetHoliday
-?       ???  MesoWest FINAL
-?   ??? Raw
-?       ??? PGE_energy_combined
-?                    ??? Customer info
-?                    ??? Unzipped electric 15 min
-?                    ??? Unzipped electric 60 min
-?       ???  PGE_Oct_2016
-?   ??? Temp
-??? Results
-?   ??? Final
-?       ??? Appendix
+|-- Code
+|   |-- Analyze
+|   |-- Build
+|   |-- Produce_output
+|-- Data
+|   |-- Intermediate
+|       |--  School specific
+|                    |-- forest
+|                    |-- double lasso
+|                    |-- prediction
+|       |--  Matching
+|   |-- Other data
+|       |--  CA school info
+|       |--  SunriseSunsetHoliday
+|       |--  MesoWest FINAL
+|   |-- Raw
+|       |-- PGE_energy_combined
+|                    |-- Customer info
+|                    |-- Unzipped electric 15 min
+|                    |-- Unzipped electric 60 min
+|       |--  PGE_Oct_2016
+|   |-- Temp
+|-- Results
+|   |-- Final
+|       |-- Appendix
 
 
 The full project data folder structure is available at the _JAERE_ website, including the fully-populated `Other data` folder. All other folders are empty, per our NDA with PG&E. In order to run the code described below, researchers will need to acquire the following datasets, and place them according to the below filepaths:
@@ -59,6 +59,4 @@ Upon obtaining data from PG&E, and populating as per the above file structure, r
 
 The `BKRRW_Schools/Build`, `BKRRW_Schools/Analyze`, and `BKRRW_Schools/Produce_output` folders contain all required sub-programs. 
 
-
-### Required data and file structure
 
