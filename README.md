@@ -1,9 +1,9 @@
 # BKRRW_Schools
-This repository contains the code required to replicate Burlig, Knittel, Rapson, Reguant, and Wolfram (2020): "Machine learning from schools about energy efficiency," conditionally accepted at the _Journal of the Association of Environmental and Resource Economists_. 
+This repository contains the code required to replicate Burlig, Knittel, Rapson, Reguant, and Wolfram (2020): "Machine learning from schools about energy efficiency," conditionally accepted at the _Journal of the Association of Environmental and Resource Economists_. The main text of the paper can be found in `BKRRW_Schools.pdf`, and the online appendix can be found in `BKRRW_Schools_OnlineAppendix.pdf.`
 
 
 ### Required data and file structure
-Due to a non-disclosure agreement between UC Berkeley and Pacific Gas and Electric (PG&E), we are unable to release the electricity data for this project publicly. Academic researchers wishing to replicate our results can submit a request through the [Energy Data Request Program](https://pge-energydatarequest.com/). 
+Due to a non-disclosure agreement between UC Berkeley and Pacific Gas and Electric (PG&E), we are unable to release the electricity data for this project publicly. Academic researchers wishing to replicate our results can submit a request through the [Energy Data Request Program](https://pge-energydatarequest.com/). Our data request can be found in this repository in `BKRRW_PGE_data_request.pdf`.
 
 The file structure for this project is as follows:
 ```
