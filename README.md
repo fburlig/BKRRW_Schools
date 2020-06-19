@@ -1,5 +1,5 @@
 # BKRRW_Schools
-This repository contains the code required to replicate Burlig, Knittel, Rapson, Reguant, and Wolfram (2020): "Machine learning from schools about energy efficiency," conditionally accepted at the _Journal of the Association of Environmental and Resource Economists_. The main text of the paper can be found in [`BKRRW_Schools.pdf`](https://github.com/fburlig/BKRRW_Schools/blob/master/BKRRW_Schools.pdf), and the online appendix can be found in [`BKRRW_Schools_OnlineAppendix.pdf]`(https://github.com/fburlig/BKRRW_Schools/blob/master/BKRRW_Schools_OnlineAppendix.pdf).
+This repository contains the code required to replicate Burlig, Knittel, Rapson, Reguant, and Wolfram (2020): "Machine learning from schools about energy efficiency," conditionally accepted at the _Journal of the Association of Environmental and Resource Economists_. The main text of the paper can be found in [`BKRRW_Schools.pdf`](https://github.com/fburlig/BKRRW_Schools/blob/master/BKRRW_Schools.pdf), and the online appendix can be found in [`BKRRW_Schools_OnlineAppendix.pdf`](https://github.com/fburlig/BKRRW_Schools/blob/master/BKRRW_Schools_OnlineAppendix.pdf).
 
 
 ### Required data and file structure
