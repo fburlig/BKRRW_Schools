@@ -34,7 +34,7 @@ MAIN PROJECT FOLDER
 |   |-- Appendix
 ```
 
-The full project data folder structure is available at the _JAERE_ website (we will update this Readme with a link when the data are available online), including the fully-populated `Other data` folder. All other folders are empty, per our NDA with PG&E. In order to run the code described below, researchers will need to acquire the following datasets, and place them according to the below filepaths:
+The full project data folder structure is available at the _JAERE_ section of the Harvard Dataverse [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NDAYCR), including the fully-populated `Other data` folder. All other folders are empty, per our NDA with PG&E. In order to run the code described below, researchers will need to acquire the following datasets, and place them according to the below filepaths:
  - Meter lat/longs (gas and electric): `[MASTER PROJECT FOLDER]/Data/Raw/`
  - Customer information data: `[MASTER PROJECT FOLDER]/Data/Raw/PGE_energy_combined/Customer info/`
  - Fifteen-minute-interval AMI data:  `[MASTER PROJECT FOLDER]/Data/Raw/PGE_energy_combined/Unzipped electric 15 min/`
